@@ -7,13 +7,26 @@ import { Reveal } from "@/components/motion/Reveal";
 export function Hero() {
   return (
     <section className="relative isolate flex min-h-[100svh] flex-col justify-end overflow-hidden bg-navy">
-      <EditorialPlaceholder
-        label="Theis + Rusmir, full-body, editorial lighting, Copenhagen loft or industrial space"
-        tone="navy"
-        fill
-        bare
-        className="border-0"
-      />
+      {/* Split duo shot: Rusmir left, Theis right — two solo photos standing
+          in for a together shot until we get one from an actual shoot. */}
+      <div className="absolute inset-0 flex">
+        <EditorialPlaceholder
+          label="Rusmir, full-body, editorial lighting, Copenhagen loft or industrial space"
+          tone="navy"
+          fill
+          bare
+          className="relative! inset-auto! h-full! w-1/2! border-0"
+        />
+        <EditorialPlaceholder
+          label="Theis"
+          src="/founders/theis.jpg"
+          focalPoint="center 20%"
+          tone="charcoal"
+          fill
+          bare
+          className="relative! inset-auto! h-full! w-1/2! border-0"
+        />
+      </div>
 
       {/* Scrim: keeps the headline legible over the placeholder without flattening it. */}
       <div
@@ -29,8 +42,13 @@ export function Hero() {
         01
       </span>
 
-      <div className="stamp notation rotate-slight absolute top-6 right-6 z-10 inline-flex origin-top-right scale-75 text-off-white sm:scale-90 md:top-10 md:right-10 md:scale-100">
-        Applications open
+      <div className="stamp-badge rotate-slight absolute top-6 right-6 z-10 flex origin-top-right flex-col items-start gap-1 bg-near-black/50 px-4 py-3 text-off-white sm:px-5 sm:py-3.5 md:top-10 md:right-10 md:px-6 md:py-4">
+        <span className="notation impact-text text-sm sm:text-base md:text-lg">
+          Applications open
+        </span>
+        <span className="notation impact-text text-[0.65rem] tracking-wide text-off-white/75 sm:text-xs">
+          (50% off for new clients)
+        </span>
       </div>
 
       <Container className="relative z-10 w-full pb-14 md:pb-20">

@@ -212,6 +212,23 @@
     box-shadow: 4px 4px 0 0 currentColor;
   }
 
+  /* Bigger sticker badge for a two-line callout (e.g. hero offer tag).
+     Border/font/shadow only — layout (flex, padding) stays with Tailwind
+     utilities on the element so the two don't fight over the cascade. */
+  .stamp-badge {
+    border-width: 2px;
+    border-style: solid;
+    border-color: currentColor;
+    letter-spacing: 0.05em;
+    box-shadow: 5px 5px 0 0 currentColor;
+  }
+
+  /* Forces the impact face even on elements (like .notation) that already
+     set their own font-family — same-element rules cascade by source order. */
+  .impact-text {
+    font-family: var(--font-impact);
+  }
+
   .rotate-slight {
     transform: rotate(-5deg);
   }

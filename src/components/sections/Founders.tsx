@@ -35,7 +35,7 @@ export function Founders() {
                 of why people quit. I talk too much about all of it. Ask Theis.
               </p>
               <p className="font-display rotate-slight mt-8 inline-block text-2xl italic">
-                &ldquo;A man should take care of himself.&rdquo;
+                &ldquo;Life won&apos;t get easier, so why not get stronger?&rdquo;
               </p>
             </div>
           </Reveal>
@@ -47,7 +47,9 @@ export function Founders() {
           >
             <div className="relative">
               <EditorialPlaceholder
-                label="Theis, relaxed three-quarter portrait, back detail, natural window light"
+                label="Theis"
+                src="/founders/theis.jpg"
+                focalPoint="center 15%"
                 tone="charcoal"
                 ratio="aspect-[5/6]"
               />
