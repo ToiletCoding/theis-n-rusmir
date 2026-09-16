@@ -8,11 +8,13 @@ type EditorialPlaceholderProps = {
   /** Small index mark, e.g. "001" — sits opposite the caption. */
   index?: string;
   tone?: Tone;
-  /** Tailwind aspect utility, e.g. "aspect-[3/4]". */
+  /** Tailwind aspect utility, e.g. "aspect-[3/4]". Ignored when `fill` is set. */
   ratio?: string;
   className?: string;
   /** Hide crop marks for tighter, quieter placements. */
   bare?: boolean;
+  /** Absolutely fill the parent instead of sizing by aspect ratio (full-bleed hero use). */
+  fill?: boolean;
 };
 
 const toneStyles: Record<Tone, { surface: string; ink: string; light: string }> = {
@@ -45,6 +47,7 @@ export function EditorialPlaceholder({
   ratio = "aspect-[4/5]",
   className,
   bare = false,
+  fill = false,
 }: EditorialPlaceholderProps) {
   const styles = toneStyles[tone];
   const isDark = tone === "navy" || tone === "charcoal";
@@ -55,7 +58,7 @@ export function EditorialPlaceholder({
         "grain relative isolate overflow-hidden border",
         !isDark && "grain-light",
         styles.surface,
-        ratio,
+        fill ? "absolute inset-0 h-full w-full" : ratio,
         className,
       )}
       role="img"
