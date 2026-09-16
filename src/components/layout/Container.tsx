@@ -82,9 +82,20 @@ export function Section({
   space = "normal",
   tone = "off-white",
 }: SectionProps) {
+  const isDark = tone === "navy" || tone === "near-black";
   return (
-    <section id={id} className={cn(toneMap[tone], spaceMap[space], className)}>
-      {children}
+    <section
+      id={id}
+      className={cn(
+        "relative isolate overflow-hidden",
+        "grain-ambient",
+        !isDark && "grain-ambient-light",
+        toneMap[tone],
+        spaceMap[space],
+        className,
+      )}
+    >
+      <div className="relative z-10">{children}</div>
     </section>
   );
 }

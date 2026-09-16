@@ -148,6 +148,54 @@
   .rule-light {
     border-color: color-mix(in oklab, var(--color-off-white) 22%, transparent);
   }
+
+  /* Quiet ambient grain for full sections — much fainter than .grain. */
+  .grain-ambient::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.06;
+    mix-blend-mode: multiply;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E");
+  }
+
+  .grain-ambient-light::after {
+    mix-blend-mode: soft-light;
+    opacity: 0.1;
+  }
+
+  /* Oversized outline numerals used as background type — controlled chaos.
+     Fill is transparent; the stroke defaults to currentColor, so a normal
+     Tailwind text-color utility on the element still sets the outline. */
+  .ghost-numeral {
+    font-family: var(--font-display);
+    font-variation-settings: "SOFT" 30, "WONK" 1, "opsz" 144;
+    -webkit-text-fill-color: transparent;
+    -webkit-text-stroke-width: 1px;
+    line-height: 0.8;
+    user-select: none;
+  }
+
+  /* Rubber-stamp accent: rotated, bordered, letterspaced. */
+  .stamp {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5em;
+    border: 1px solid currentColor;
+    padding: 0.5em 0.9em;
+    transform: rotate(-3deg);
+    white-space: nowrap;
+  }
+
+  .rotate-slight {
+    transform: rotate(-1.4deg);
+  }
+
+  .rotate-slight-reverse {
+    transform: rotate(1.4deg);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

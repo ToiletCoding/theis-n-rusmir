@@ -18,8 +18,20 @@ export function Hero() {
       {/* Scrim: keeps the headline legible over the placeholder without flattening it. */}
       <div
         aria-hidden="true"
-        className="absolute inset-0 bg-gradient-to-t from-near-black/85 via-near-black/20 to-transparent"
+        className="absolute inset-0 bg-gradient-to-t from-near-black/85 via-near-black/25 to-transparent"
       />
+
+      {/* Oversized outline numeral bleeding off the top edge — controlled chaos beat. */}
+      <span
+        aria-hidden="true"
+        className="ghost-numeral pointer-events-none absolute -top-[6vw] right-[4vw] text-[38vw] text-steel/40 select-none md:-top-[4vw] md:right-[6vw] md:text-[26vw]"
+      >
+        01
+      </span>
+
+      <div className="stamp notation rotate-slight absolute top-8 right-6 z-10 hidden text-off-white/70 md:top-10 md:right-10 md:inline-flex">
+        Applications open
+      </div>
 
       <Container className="relative z-10 w-full pb-14 md:pb-20">
         <Reveal>
@@ -32,7 +44,25 @@ export function Hero() {
 
         <Reveal delay={0.08}>
           <h1 className="font-display text-display-1 max-w-[16ch] text-off-white">
-            The pursuit starts with you.
+            The pursuit starts with{" "}
+            <span className="relative inline-block">
+              you
+              <svg
+                aria-hidden="true"
+                viewBox="0 0 200 20"
+                className="absolute -bottom-2 left-0 h-[0.2em] w-full text-steel md:-bottom-3"
+                preserveAspectRatio="none"
+              >
+                <path
+                  d="M2 14 C 40 4, 80 18, 100 10 S 160 2, 198 12"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="3"
+                  strokeLinecap="round"
+                />
+              </svg>
+            </span>
+            .
           </h1>
         </Reveal>
 
