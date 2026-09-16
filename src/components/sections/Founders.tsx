@@ -19,7 +19,7 @@ export function Founders() {
                 tone="cream"
                 ratio="aspect-[3/4]"
               />
-              <div className="stamp notation rotate-slight-reverse bg-off-white absolute -top-4 -left-4 text-near-black/70 md:-top-5 md:-left-6">
+              <div className="stamp notation rotate-slight-reverse bg-off-white absolute -top-4 -left-4 text-near-black md:-top-5 md:-left-6">
                 R / 001
               </div>
             </div>
@@ -51,7 +51,7 @@ export function Founders() {
                 tone="charcoal"
                 ratio="aspect-[5/6]"
               />
-              <div className="stamp notation rotate-slight bg-navy absolute -top-4 -right-4 text-off-white/80 md:-top-5 md:-right-6">
+              <div className="stamp notation rotate-slight bg-navy absolute -top-4 -right-4 text-off-white md:-top-5 md:-right-6">
                 T / 002
               </div>
             </div>

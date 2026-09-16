@@ -150,21 +150,38 @@
     border-color: color-mix(in oklab, var(--color-off-white) 22%, transparent);
   }
 
-  /* Quiet ambient grain for full sections — much fainter than .grain. */
+  /* Ambient grain for full sections — coarser and grittier than a subtle
+     vignette; this should read like a bad photocopy, not a soft vignette. */
   .grain-ambient::after {
     content: "";
     position: absolute;
     inset: 0;
     pointer-events: none;
     z-index: 0;
-    opacity: 0.06;
+    opacity: 0.11;
     mix-blend-mode: multiply;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E");
   }
 
   .grain-ambient-light::after {
     mix-blend-mode: soft-light;
-    opacity: 0.1;
+    opacity: 0.16;
+  }
+
+  /* Halftone dot screen — xeroxed-flyer texture for dark, punchier beats. */
+  .halftone {
+    position: relative;
+  }
+
+  .halftone::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.5;
+    background-image: radial-gradient(currentColor 1px, transparent 1.4px);
+    background-size: 7px 7px;
   }
 
   /* Oversized outline numerals used as background type — controlled chaos.
@@ -174,31 +191,33 @@
   .ghost-numeral {
     font-family: var(--font-impact);
     -webkit-text-fill-color: transparent;
-    -webkit-text-stroke-width: 1.5px;
+    -webkit-text-stroke-width: 2.5px;
     line-height: 0.8;
     user-select: none;
   }
 
-  /* Rubber-stamp accent: rotated, bordered, impact type, wide letterspacing. */
+  /* Rubber-stamp / sticker accent: thick border, hard offset shadow (no
+     blur — a cut-and-paste sticker, not a soft drop shadow), impact type. */
   .stamp {
     display: inline-flex;
     align-items: center;
     gap: 0.5em;
-    border: 1px solid currentColor;
+    border: 2px solid currentColor;
     padding: 0.5em 0.9em;
-    transform: rotate(-3deg);
+    transform: rotate(-6deg);
     white-space: nowrap;
     font-family: var(--font-impact);
     letter-spacing: 0.08em;
-    font-size: 0.75rem;
+    font-size: 0.8125rem;
+    box-shadow: 4px 4px 0 0 currentColor;
   }
 
   .rotate-slight {
-    transform: rotate(-1.4deg);
+    transform: rotate(-5deg);
   }
 
   .rotate-slight-reverse {
-    transform: rotate(1.4deg);
+    transform: rotate(5deg);
   }
 }
 

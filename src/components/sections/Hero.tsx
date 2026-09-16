@@ -24,12 +24,12 @@ export function Hero() {
       {/* Oversized outline numeral bleeding off the top edge — controlled chaos beat. */}
       <span
         aria-hidden="true"
-        className="ghost-numeral pointer-events-none absolute -top-[6vw] right-[4vw] text-[38vw] text-steel/40 select-none md:-top-[4vw] md:right-[6vw] md:text-[26vw]"
+        className="ghost-numeral pointer-events-none absolute -top-[6vw] right-[4vw] text-[38vw] text-steel/55 select-none md:-top-[4vw] md:right-[6vw] md:text-[26vw]"
       >
         01
       </span>
 
-      <div className="stamp notation rotate-slight absolute top-6 right-6 z-10 inline-flex origin-top-right scale-75 text-off-white/70 sm:scale-90 md:top-10 md:right-10 md:scale-100">
+      <div className="stamp notation rotate-slight absolute top-6 right-6 z-10 inline-flex origin-top-right scale-75 text-off-white sm:scale-90 md:top-10 md:right-10 md:scale-100">
         Applications open
       </div>
 
@@ -49,16 +49,24 @@ export function Hero() {
               you
               <svg
                 aria-hidden="true"
-                viewBox="0 0 200 20"
-                className="absolute -bottom-2 left-0 h-[0.2em] w-full text-steel md:-bottom-3"
+                viewBox="0 0 200 24"
+                className="absolute -bottom-3 left-0 h-[0.3em] w-full text-steel md:-bottom-4"
                 preserveAspectRatio="none"
               >
                 <path
-                  d="M2 14 C 40 4, 80 18, 100 10 S 160 2, 198 12"
+                  d="M2 16 C 36 4, 78 22, 102 8 S 158 20, 198 6"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                  strokeLinecap="round"
+                />
+                <path
+                  d="M4 10 C 44 20, 84 4, 108 16 S 162 6, 196 18"
                   fill="none"
                   stroke="currentColor"
                   strokeWidth="3"
                   strokeLinecap="round"
+                  opacity="0.6"
                 />
               </svg>
             </span>
