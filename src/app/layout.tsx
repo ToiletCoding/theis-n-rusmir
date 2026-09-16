@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { fraunces, generalSans } from "@/fonts/fonts";
+import { anton, fraunces, generalSans } from "@/fonts/fonts";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -12,7 +12,10 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={`${generalSans.variable} ${fraunces.variable}`}>
+    <html
+      lang="en"
+      className={`${generalSans.variable} ${fraunces.variable} ${anton.variable}`}
+    >
       <body>{children}</body>
     </html>
   );

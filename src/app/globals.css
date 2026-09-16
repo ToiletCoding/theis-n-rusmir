@@ -13,6 +13,7 @@
   --font-sans: var(--font-general-sans), "Helvetica Neue", Arial, sans-serif;
   --font-display: var(--font-fraunces), Georgia, "Times New Roman", serif;
   --font-mono: ui-monospace, "SFMono-Regular", "SF Mono", Menlo, monospace;
+  --font-impact: var(--font-anton), Impact, "Arial Narrow", sans-serif;
 
   /* ---- Editorial type scale (fluid, magazine-sized) --------------- */
   --text-display-1: clamp(3rem, 1.2rem + 8.5vw, 10.5rem);
@@ -34,7 +35,7 @@
   --text-lede: clamp(1.125rem, 1rem + 0.65vw, 1.5rem);
   --text-lede--line-height: 1.5;
 
-  --text-body: clamp(1rem, 0.96rem + 0.2vw, 1.125rem);
+  --text-body: clamp(0.9375rem, 0.9rem + 0.18vw, 1.0625rem);
   --text-body--line-height: 1.65;
 
   --text-notation: 0.6875rem;
@@ -167,18 +168,18 @@
   }
 
   /* Oversized outline numerals used as background type — controlled chaos.
+     Bold impact face (not Fraunces) for a hardcore-streetwear stamp feel.
      Fill is transparent; the stroke defaults to currentColor, so a normal
      Tailwind text-color utility on the element still sets the outline. */
   .ghost-numeral {
-    font-family: var(--font-display);
-    font-variation-settings: "SOFT" 30, "WONK" 1, "opsz" 144;
+    font-family: var(--font-impact);
     -webkit-text-fill-color: transparent;
-    -webkit-text-stroke-width: 1px;
+    -webkit-text-stroke-width: 1.5px;
     line-height: 0.8;
     user-select: none;
   }
 
-  /* Rubber-stamp accent: rotated, bordered, letterspaced. */
+  /* Rubber-stamp accent: rotated, bordered, impact type, wide letterspacing. */
   .stamp {
     display: inline-flex;
     align-items: center;
@@ -187,6 +188,9 @@
     padding: 0.5em 0.9em;
     transform: rotate(-3deg);
     white-space: nowrap;
+    font-family: var(--font-impact);
+    letter-spacing: 0.08em;
+    font-size: 0.75rem;
   }
 
   .rotate-slight {

@@ -1,5 +1,5 @@
 import localFont from "next/font/local";
-import { Fraunces } from "next/font/google";
+import { Anton, Fraunces } from "next/font/google";
 
 export const generalSans = localFont({
   src: [
@@ -26,4 +26,14 @@ export const fraunces = Fraunces({
   weight: "variable",
   axes: ["SOFT", "WONK", "opsz"],
   fallback: ["Georgia", "Times New Roman", "serif"],
+});
+
+// Bold condensed impact face — used sparingly for stamps and ghost numerals,
+// a lowkey nod to hardcore-streetwear branding (Stay Cold Apparel etc).
+export const anton = Anton({
+  subsets: ["latin"],
+  variable: "--font-anton",
+  display: "swap",
+  weight: "400",
+  fallback: ["Impact", "Arial Narrow", "sans-serif"],
 });

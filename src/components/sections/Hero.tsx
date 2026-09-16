@@ -29,7 +29,7 @@ export function Hero() {
         01
       </span>
 
-      <div className="stamp notation rotate-slight absolute top-8 right-6 z-10 hidden text-off-white/70 md:top-10 md:right-10 md:inline-flex">
+      <div className="stamp notation rotate-slight absolute top-6 right-6 z-10 inline-flex origin-top-right scale-75 text-off-white/70 sm:scale-90 md:top-10 md:right-10 md:scale-100">
         Applications open
       </div>
 

@@ -1,5 +1,6 @@
 import { Hero } from "@/components/sections/Hero";
 import { Manifesto } from "@/components/sections/Manifesto";
+import { SectionBreak } from "@/components/sections/SectionBreak";
 import { Founders } from "@/components/sections/Founders";
 
 export default function Home() {
@@ -7,6 +8,7 @@ export default function Home() {
     <main>
       <Hero />
       <Manifesto />
+      <SectionBreak />
       <Founders />
     </main>
   );
