@@ -1,69 +1,171 @@
-import Image from "next/image";
+import { Container, Grid, Section } from "@/components/layout/Container";
+import { ArrowLink, Button, ButtonLink } from "@/components/ui/Button";
+import { EditorialPlaceholder } from "@/components/ui/EditorialPlaceholder";
+import { Notation, Rule } from "@/components/ui/Notation";
+import { Reveal, RevealItem, Stagger } from "@/components/motion/Reveal";
 
 export default function Home() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
+    <main>
+      <Section space="normal" tone="off-white">
+        <Container>
+          <Notation
+            items={["T&R / 001", "THE PURSUIT", "COPENHAGEN / DENMARK", "EST. 2026"]}
+          />
+          <Rule className="mt-6 mb-16" />
+          <Grid>
+            <div className="col-span-4 md:col-span-7">
+              <h1 className="font-display text-display-1">Design system</h1>
+            </div>
+            <div className="col-span-4 self-end md:col-span-4 md:col-start-9">
+              <p className="text-lede max-w-[38ch]">
+                Foundation only — type scale, palette, placeholder, buttons, notation and
+                motion. No page content yet.
+              </p>
+            </div>
+          </Grid>
+        </Container>
+      </Section>
+
+      <Section space="normal" tone="cream">
+        <Container>
+          <Notation items={["01", "TYPE SCALE"]} />
+          <Rule className="mt-6 mb-14" />
+          <Stagger className="space-y-10">
+            <RevealItem>
+              <p className="caption mb-3 text-near-black/40">display-1 / Fraunces</p>
+              <p className="font-display text-display-1">The pursuit</p>
+            </RevealItem>
+            <RevealItem>
+              <p className="caption mb-3 text-near-black/40">display-2 / Fraunces</p>
+              <p className="font-display text-display-2">Aesthetics, knowledge</p>
+            </RevealItem>
+            <RevealItem>
+              <p className="caption mb-3 text-near-black/40">display-3 / Fraunces</p>
+              <p className="font-display text-display-3">Your pursuit. Our attention.</p>
+            </RevealItem>
+            <RevealItem>
+              <p className="caption mb-3 text-near-black/40">
+                display-4 / General Sans medium
+              </p>
+              <p className="text-display-4 font-medium">Founding clients / 001</p>
+            </RevealItem>
+            <RevealItem>
+              <p className="caption mb-3 text-near-black/40">lede / General Sans</p>
+              <p className="text-lede max-w-[46ch]">
+                Build a physique you are proud of, and the confidence that comes with it.
+              </p>
+            </RevealItem>
+            <RevealItem>
+              <p className="caption mb-3 text-near-black/40">body / General Sans</p>
+              <p className="text-body max-w-[62ch] text-near-black/75">
+                Personalised programming, regular check-ins, honest adjustments. Two friends
+                learning in public and taking a small number of people with them.
+              </p>
+            </RevealItem>
+            <RevealItem>
+              <p className="caption mb-3 text-near-black/40">notation / caption</p>
+              <div className="flex flex-wrap items-baseline gap-6">
+                <Notation tone="dark">T&amp;R / 001 — COPENHAGEN</Notation>
+                <span className="caption text-near-black/45">
+                  Photo: Theis + Rusmir, editorial lighting
+                </span>
+              </div>
+            </RevealItem>
+          </Stagger>
+        </Container>
+      </Section>
+
+      <Section space="normal" tone="off-white">
+        <Container>
+          <Notation items={["02", "PALETTE"]} />
+          <Rule className="mt-6 mb-14" />
+          <Grid gap="tight">
+            {[
+              { name: "off-white", hex: "#F2EFEA", className: "bg-off-white" },
+              { name: "cream", hex: "#EAE4D9", className: "bg-cream" },
+              { name: "steel", hex: "#B8BCC0", className: "bg-steel" },
+              { name: "charcoal", hex: "#2B2B2B", className: "bg-charcoal" },
+              { name: "navy", hex: "#10151F", className: "bg-navy" },
+              { name: "near-black", hex: "#121212", className: "bg-near-black" },
+            ].map((swatch) => (
+              <div key={swatch.name} className="col-span-2">
+                <div
+                  className={`grain h-28 border border-near-black/12 ${swatch.className}`}
+                />
+                <p className="caption mt-3 text-near-black/60">{swatch.name}</p>
+                <p className="caption text-near-black/35">{swatch.hex}</p>
+              </div>
+            ))}
+          </Grid>
+        </Container>
+      </Section>
+
+      <Section space="normal" tone="cream">
+        <Container>
+          <Notation items={["03", "EDITORIAL PLACEHOLDER"]} />
+          <Rule className="mt-6 mb-14" />
+          <Grid gap="tight">
+            <Reveal className="col-span-4 md:col-span-5">
+              <EditorialPlaceholder
+                label="Theis + Rusmir, full-body, editorial lighting, Copenhagen loft"
+                index="001"
+                tone="off-white"
+                ratio="aspect-[4/5]"
+              />
+            </Reveal>
+            <Reveal
+              delay={0.08}
+              className="col-span-4 md:col-span-4 md:col-start-7 md:mt-20"
             >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+              <EditorialPlaceholder
+                label="Back detail, low side light, bare concrete wall"
+                index="002"
+                tone="navy"
+                ratio="aspect-[3/4]"
+              />
+            </Reveal>
+            <Reveal delay={0.16} className="col-span-4 md:col-span-11 md:col-start-2">
+              <EditorialPlaceholder
+                label="Wide studio shot, old wooden floor, steel rail"
+                index="003"
+                tone="charcoal"
+                ratio="aspect-[16/9]"
+              />
+            </Reveal>
+          </Grid>
+        </Container>
+      </Section>
+
+      <Section space="normal" tone="off-white">
+        <Container>
+          <Notation items={["04", "ACTIONS"]} />
+          <Rule className="mt-6 mb-14" />
+          <div className="flex flex-wrap items-center gap-x-10 gap-y-8">
+            <ButtonLink href="#">Apply for coaching</ButtonLink>
+            <Button variant="outline">Secondary action</Button>
+            <ArrowLink href="#">Follow the pursuit</ArrowLink>
+          </div>
+        </Container>
+      </Section>
+
+      <Section space="normal" tone="navy">
+        <Container>
+          <Notation items={["05", "ACTIONS ON DARK"]} tone="light" className="opacity-60" />
+          <Rule tone="light" className="mt-6 mb-14" />
+          <div className="flex flex-wrap items-center gap-x-10 gap-y-8">
+            <ButtonLink href="#" tone="light">
+              Apply for coaching
+            </ButtonLink>
+            <Button variant="outline" tone="light">
+              Secondary action
+            </Button>
+            <ArrowLink href="#" tone="light">
+              Follow the pursuit
+            </ArrowLink>
+          </div>
+        </Container>
+      </Section>
+    </main>
   );
 }
