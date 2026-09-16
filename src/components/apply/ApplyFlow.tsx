@@ -72,10 +72,14 @@ type FormState = Record<string, string>;
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 
+const FORMSPREE_ENDPOINT = "https://formspree.io/f/meaoqokj";
+
 export function ApplyFlow() {
   const [step, setStep] = useState(0);
   const [form, setForm] = useState<FormState>({});
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const [direction, setDirection] = useState<1 | -1>(1);
   const reduceMotion = useReducedMotion();
   const inputRef = useRef<HTMLInputElement | HTMLTextAreaElement | null>(null);
@@ -93,12 +97,25 @@ export function ApplyFlow() {
     setForm((f) => ({ ...f, [question.id]: next }));
   }
 
-  function goNext() {
-    if (!canAdvance) return;
+  async function goNext() {
+    if (!canAdvance || submitting) return;
     if (isLast) {
-      // Frontend-only prototype: log the payload instead of submitting anywhere.
-      console.log("Coaching application submitted:", form);
-      setSubmitted(true);
+      setSubmitting(true);
+      setSubmitError(null);
+      try {
+        const res = await fetch(FORMSPREE_ENDPOINT, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Accept: "application/json" },
+          body: JSON.stringify(form),
+        });
+        if (!res.ok) throw new Error("Formspree returned " + res.status);
+        setSubmitted(true);
+      } catch (err) {
+        console.error("Application submission failed:", err);
+        setSubmitError("Something went wrong sending that — mind trying again?");
+      } finally {
+        setSubmitting(false);
+      }
       return;
     }
     setDirection(1);
@@ -233,11 +250,15 @@ export function ApplyFlow() {
           </AnimatePresence>
         </div>
 
+        {submitError && (
+          <p className="notation mb-4 text-right text-red-800/80">{submitError}</p>
+        )}
+
         <div className="flex items-center justify-between pt-6">
           <button
             type="button"
             onClick={goBack}
-            disabled={step === 0}
+            disabled={step === 0 || submitting}
             className="notation text-near-black/50 hover:text-near-black disabled:opacity-0"
           >
             &#8592; Back
@@ -246,10 +267,10 @@ export function ApplyFlow() {
           <button
             type="button"
             onClick={goNext}
-            disabled={!canAdvance}
+            disabled={!canAdvance || submitting}
             className="stamp-badge rotate-slight notation inline-flex bg-near-black px-8 py-4 text-off-white transition-opacity disabled:cursor-not-allowed disabled:opacity-30"
           >
-            {isLast ? "Submit application" : "Next"}
+            {isLast ? (submitting ? "Sending…" : "Submit application") : "Next"}
           </button>
         </div>
       </Container>
