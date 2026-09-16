@@ -11,7 +11,9 @@ export function Hero() {
           in for a together shot until we get one from an actual shoot. */}
       <div className="absolute inset-0 flex">
         <EditorialPlaceholder
-          label="Rusmir, full-body, editorial lighting, Copenhagen loft or industrial space"
+          label="Rusmir"
+          src="/founders/rusmir-full.jpg"
+          focalPoint="center 15%"
           tone="navy"
           fill
           bare

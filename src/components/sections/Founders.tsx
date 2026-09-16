@@ -15,7 +15,8 @@ export function Founders() {
           <Reveal from="left" className="relative col-span-4 md:col-span-5 md:col-start-1">
             <div className="relative">
               <EditorialPlaceholder
-                label="Rusmir, three-quarter portrait, chest/shoulders emphasis, hard side light"
+                label="Rusmir"
+                src="/founders/rusmir.jpg"
                 tone="cream"
                 ratio="aspect-[3/4]"
               />
