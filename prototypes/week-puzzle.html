@@ -1,0 +1,1491 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>Week Puzzle</title>
+<!--
+  Week Puzzle: a one-week prototype.
+  Open this file in a browser. There's nothing to install and no login.
+  The week is saved in this browser's localStorage (key "week-puzzle/v1"),
+  so it survives a refresh, but it doesn't sync between devices.
+-->
+<style>
+  :root {
+    color-scheme: dark;
+    --bg: #0b0d11;
+    --panel: #12151b;
+    --panel-2: #171b22;
+    --panel-3: #1e232c;
+    --border: rgba(255, 255, 255, 0.07);
+    --line: rgba(255, 255, 255, 0.04);
+    --line-hour: rgba(255, 255, 255, 0.085);
+    --text: #e7e9ef;
+    --muted: #9299a8;
+    --faint: #5e6574;
+    --warn: #f3b46c;
+    --bad: #ff7b87;
+    --now: #ff6f91;
+    --peak: rgba(185, 163, 255, 0.05);
+    --rainbow: linear-gradient(90deg,
+      #ff7a9a, #ffb877, #f1f47a, #7dffb6, #74d0ff, #a393ff, #ff7ad8,
+      #ff7a9a, #ffb877, #f1f47a, #7dffb6, #74d0ff, #a393ff, #ff7ad8, #ff7a9a);
+    --slot-h: 22px;
+    --gutter-w: 60px;
+    --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Inter, Roboto, "Helvetica Neue", Arial, sans-serif;
+  }
+
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  html, body { margin: 0; }
+  body {
+    min-height: 100vh;
+    background:
+      radial-gradient(900px 500px at 75% -10%, rgba(130, 115, 255, 0.08), transparent 65%),
+      radial-gradient(700px 400px at 0% 110%, rgba(255, 120, 160, 0.05), transparent 60%),
+      var(--bg);
+    color: var(--text);
+    font: 13px/1.4 var(--font);
+    -webkit-font-smoothing: antialiased;
+  }
+  button { font: inherit; color: inherit; }
+  :focus-visible { outline: 2px solid #a393ff; outline-offset: 2px; }
+
+  .app {
+    display: grid;
+    grid-template-columns: 250px minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
+    height: 100vh;
+    height: 100dvh;
+  }
+
+  /* ---- Top bar ------------------------------------------------------ */
+  .topbar {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 12px 20px;
+    border-bottom: 1px solid var(--border);
+  }
+  .brand { width: 210px; flex: none; }
+  .brand h1 { margin: 0; font-size: 15px; font-weight: 650; letter-spacing: -0.01em; }
+  .brand small { display: block; margin-top: 1px; color: var(--faint); font-size: 11px; }
+  .brand small.warn { color: var(--warn); }
+
+  .progress-wrap { flex: 1; display: flex; justify-content: center; min-width: 0; }
+  .pg {
+    position: relative;
+    padding: 1.5px;
+    border-radius: 999px;
+    background: var(--border);
+    min-width: 280px;
+    transition: scale 0.3s;
+  }
+  .pg-glow {
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: var(--rainbow);
+    background-size: 200% 100%;
+    filter: blur(14px);
+    opacity: 0;
+    transition: opacity 0.6s;
+  }
+  .pg-inner {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 7px 18px 8px;
+    border-radius: inherit;
+    background: var(--panel-2);
+  }
+  .pg-label {
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+  }
+  .pg-item b { font-weight: 600; color: var(--text); }
+  .pg-item.met { color: color-mix(in srgb, var(--c) 70%, white); }
+  .pg-sep { margin: 0 8px; color: var(--faint); }
+  .pg-bar { display: flex; gap: 3px; height: 4px; }
+  .pg-bar:empty { display: none; }
+  .pg-seg {
+    position: relative;
+    flex: 1 1 0;
+    border-radius: 99px;
+    background: rgba(255, 255, 255, 0.07);
+    overflow: hidden;
+  }
+  .pg-seg i {
+    position: absolute;
+    inset: 0 auto 0 0;
+    border-radius: inherit;
+    background: var(--c);
+    box-shadow: 0 0 8px var(--c);
+    transition: width 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  .pg.complete { background: var(--rainbow); background-size: 200% 100%; animation: rgb-slide 4s linear infinite; }
+  .pg.complete .pg-glow { opacity: 0.55; animation: rgb-slide 4s linear infinite; }
+  .pg.complete .pg-item b { color: #fff; }
+  .pg.celebrate { scale: 1.05; }
+  .pg.celebrate .pg-glow { opacity: 0.95; }
+
+  .actions { display: flex; gap: 8px; flex: none; }
+  .btn {
+    height: 34px;
+    padding: 0 14px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--panel-2);
+    color: var(--muted);
+    font-weight: 550;
+    cursor: pointer;
+    transition: color 0.15s, border-color 0.15s, box-shadow 0.2s;
+  }
+  .btn:hover:not(:disabled) { color: var(--text); border-color: rgba(255, 255, 255, 0.15); }
+  .btn:disabled { opacity: 0.35; cursor: default; }
+  .btn-primary {
+    padding: 0 16px;
+    color: var(--text);
+    border: 1.5px solid transparent;
+    background: linear-gradient(var(--panel-3), var(--panel-3)) padding-box, var(--rainbow) border-box;
+    background-size: 100% 100%, 200% 100%;
+    animation: rgb-slide-2 8s linear infinite;
+  }
+  .btn-primary:hover:not(:disabled) { border-color: transparent; box-shadow: 0 0 24px -6px rgba(163, 147, 255, 0.65); }
+  .btn-primary .spark { display: inline-block; margin-right: 6px; color: #c9bdff; }
+
+  @keyframes rgb-slide { from { background-position: 0% 0; } to { background-position: 100% 0; } }
+  @keyframes rgb-slide-2 { from { background-position: 0 0, 0% 0; } to { background-position: 0 0, 100% 0; } }
+
+  /* ---- Tray --------------------------------------------------------- */
+  .tray { position: relative; min-height: 0; border-right: 1px solid var(--border); }
+  .tray-scroll {
+    height: 100%;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 14px 14px 18px;
+  }
+  .tray h2 {
+    margin: 2px 4px 2px;
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--faint);
+  }
+  .piece-list { display: flex; flex-direction: column; gap: 8px; }
+  .piece {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    padding: 9px 10px 10px 14px;
+    border-radius: 12px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    cursor: grab;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: none;
+    transition: translate 0.15s, border-color 0.15s, box-shadow 0.2s;
+  }
+  .piece::before {
+    content: "";
+    position: absolute;
+    left: -1px;
+    top: 10px;
+    bottom: 10px;
+    width: 3px;
+    border-radius: 0 3px 3px 0;
+    background: var(--c);
+    box-shadow: 0 0 10px var(--c);
+  }
+  body:not(.is-dragging) .piece:hover {
+    translate: 0 -1px;
+    border-color: color-mix(in srgb, var(--c) 45%, transparent);
+    box-shadow: 0 12px 30px -18px var(--c);
+  }
+  .p-top { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+  .p-name { font-weight: 600; font-size: 13px; }
+  .p-tag {
+    margin-left: 6px;
+    padding: 1px 5px;
+    border-radius: 4px;
+    font-size: 9.5px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    vertical-align: 1px;
+    color: var(--c);
+    background: color-mix(in srgb, var(--c) 14%, transparent);
+  }
+  .p-count { font-size: 11px; color: var(--faint); font-variant-numeric: tabular-nums; }
+  .p-count.met { color: var(--c); }
+  .pips { display: flex; flex-wrap: wrap; gap: 2px; min-height: 6px; }
+  .pip { width: 9px; height: 6px; border-radius: 2px; background: var(--c); opacity: 0.75; }
+  .p-ctrls { display: flex; gap: 6px; }
+  .stepper {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--panel-2);
+    overflow: hidden;
+    cursor: default;
+  }
+  .stepper button {
+    width: 24px;
+    height: 24px;
+    flex: none;
+    border: 0;
+    background: transparent;
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1;
+    cursor: pointer;
+  }
+  .stepper button:hover:not(:disabled) { color: var(--text); background: rgba(255, 255, 255, 0.06); }
+  .stepper button:disabled { opacity: 0.25; cursor: default; }
+  .stepper output {
+    flex: 1;
+    text-align: center;
+    font-size: 11.5px;
+    white-space: nowrap;
+    color: var(--text);
+    font-variant-numeric: tabular-nums;
+  }
+  .stepper output.off { color: var(--faint); }
+
+  .tray.drop-remove::after {
+    content: "Drop here to remove";
+    position: absolute;
+    inset: 10px;
+    display: grid;
+    place-items: center;
+    border-radius: 14px;
+    border: 1.5px dashed rgba(255, 255, 255, 0.18);
+    background: rgba(11, 13, 17, 0.92);
+    color: var(--muted);
+    font-weight: 600;
+    transition: color 0.15s, border-color 0.15s;
+  }
+  .tray.drop-remove.hot::after { border-color: var(--bad); color: var(--bad); }
+
+  .hints { margin-top: 6px; padding: 0 4px; color: var(--faint); font-size: 11.5px; line-height: 1.5; }
+  .hints p { margin: 0 0 8px; }
+  .hints b { color: var(--muted); font-weight: 600; }
+  .hints ul { margin: 0; padding-left: 14px; }
+  .hints kbd { font: inherit; color: var(--muted); }
+
+  /* ---- Board -------------------------------------------------------- */
+  .board { min-width: 0; min-height: 0; overflow: auto; padding: 0 20px 20px 6px; }
+  .board-inner { min-width: calc(var(--gutter-w) + 7 * 92px); }
+  .heads, .grid {
+    display: grid;
+    grid-template-columns: var(--gutter-w) repeat(7, minmax(92px, 1fr));
+  }
+  .heads { position: sticky; top: 0; z-index: 6; background: var(--bg); }
+  .day-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 6px;
+    padding: 12px 8px 8px;
+  }
+  .day-head .dn { font-weight: 600; color: var(--muted); }
+  .day-head.today .dn { color: var(--text); }
+  .day-head.today .dn::after {
+    content: "";
+    display: inline-block;
+    width: 5px;
+    height: 5px;
+    margin-left: 6px;
+    vertical-align: 2px;
+    border-radius: 50%;
+    background: var(--now);
+    box-shadow: 0 0 8px var(--now);
+  }
+  .day-head .dt { font-size: 11px; color: var(--faint); font-variant-numeric: tabular-nums; }
+  .day-head .dt.over { color: var(--warn); }
+
+  .grid { position: relative; margin-top: 8px; }
+  .gutter { position: relative; height: calc(var(--slot-h) * 30); }
+  .hour {
+    position: absolute;
+    right: 9px;
+    top: calc(var(--slot-h) * 2 * var(--i));
+    translate: 0 -50%;
+    font-size: 10.5px;
+    color: var(--faint);
+    font-variant-numeric: tabular-nums;
+  }
+  .peak-mark {
+    position: absolute;
+    left: 4px;
+    top: calc(var(--slot-h) * 8 + 4px);
+    height: calc(var(--slot-h) * 10 - 8px);
+    width: 2px;
+    border-radius: 2px;
+    background: rgba(185, 163, 255, 0.35);
+  }
+  .peak-mark span {
+    position: absolute;
+    top: 50%;
+    left: 4px;
+    translate: 0 -50%;
+    writing-mode: vertical-rl;
+    rotate: 180deg;
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgba(185, 163, 255, 0.6);
+    white-space: nowrap;
+  }
+  .day {
+    position: relative;
+    height: calc(var(--slot-h) * 30);
+    border-left: 1px solid var(--line);
+    border-bottom: 1px solid var(--line-hour);
+    background-image:
+      repeating-linear-gradient(to bottom, var(--line-hour) 0 1px, transparent 1px calc(var(--slot-h) * 2)),
+      repeating-linear-gradient(to bottom, var(--line) 0 1px, transparent 1px var(--slot-h));
+  }
+  .day:last-child { border-right: 1px solid var(--line); }
+  .day.today { background-color: rgba(255, 255, 255, 0.018); }
+  .peak {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: calc(var(--slot-h) * 8);
+    height: calc(var(--slot-h) * 10);
+    background: var(--peak);
+    pointer-events: none;
+  }
+  .now {
+    position: absolute;
+    left: -1px;
+    right: 0;
+    height: 2px;
+    margin-top: -1px;
+    background: var(--now);
+    box-shadow: 0 0 10px var(--now);
+    z-index: 4;
+    pointer-events: none;
+  }
+  .now::before {
+    content: "";
+    position: absolute;
+    left: -4px;
+    top: -3px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--now);
+  }
+  .empty {
+    position: absolute;
+    left: var(--gutter-w);
+    right: 0;
+    top: calc(var(--slot-h) * 3);
+    display: flex;
+    justify-content: center;
+    pointer-events: none;
+  }
+  .empty p {
+    max-width: 380px;
+    margin: 0;
+    padding: 14px 18px;
+    border-radius: 14px;
+    border: 1px dashed rgba(255, 255, 255, 0.1);
+    background: rgba(11, 13, 17, 0.7);
+    color: var(--muted);
+    text-align: center;
+    line-height: 1.55;
+  }
+
+  /* ---- Pieces on the board ----------------------------------------- */
+  .block {
+    position: absolute;
+    left: 3px;
+    right: 3px;
+    top: calc(var(--slot-h) * var(--s) + 1px);
+    height: calc(var(--slot-h) * var(--n) - 2px);
+    z-index: 2;
+    padding: 3px 22px 3px 9px;
+    overflow: hidden;
+    border-radius: 7px;
+    border: 1px solid color-mix(in srgb, var(--c) 26%, transparent);
+    background-color: color-mix(in srgb, var(--c) 16%, #13161c);
+    box-shadow: inset 3px 0 0 var(--c);
+    color: color-mix(in srgb, var(--c) 32%, white);
+    cursor: grab;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: none;
+    transition: box-shadow 0.18s, border-color 0.18s, opacity 0.15s;
+  }
+  body:not(.is-dragging) .block:hover {
+    border-color: color-mix(in srgb, var(--c) 60%, transparent);
+    box-shadow: inset 3px 0 0 var(--c), 0 8px 24px -10px var(--c);
+  }
+  .block.locked {
+    cursor: pointer;
+    border-color: color-mix(in srgb, var(--c) 50%, transparent);
+    background-image: repeating-linear-gradient(-45deg,
+      color-mix(in srgb, var(--c) 10%, transparent) 0 5px, transparent 5px 10px);
+  }
+  .b-name {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    min-width: 0;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .b-name span { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+  .b-time { font-size: 11px; opacity: 0.72; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .lock { display: none; width: 11px; height: 11px; flex: none; }
+  .block.locked .lock { display: block; }
+  .block.tiny { display: flex; align-items: center; gap: 6px; padding-top: 0; padding-bottom: 0; }
+  .block.tiny .b-time { font-size: 10px; }
+  .b-x {
+    position: absolute;
+    top: 3px;
+    right: 3px;
+    width: 18px;
+    height: 18px;
+    display: grid;
+    place-items: center;
+    padding: 0;
+    border: 0;
+    border-radius: 5px;
+    background: rgba(0, 0, 0, 0.35);
+    color: #fff;
+    font-size: 13px;
+    line-height: 1;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.12s, background 0.12s;
+  }
+  .block.tiny .b-x { top: 50%; translate: 0 -50%; width: 16px; height: 16px; }
+  body:not(.is-dragging) .block:hover .b-x, .block:focus-visible .b-x { opacity: 0.85; }
+  .b-x:hover { background: var(--bad); color: #16181d; opacity: 1 !important; }
+  @media (hover: none) { .b-x { opacity: 0.7; } }
+
+  .block.lifted { opacity: 0.22; }
+  .block.land { animation: land 0.34s cubic-bezier(0.2, 0.9, 0.3, 1.25) both, flash 0.9s ease-out; }
+  .block.nope { animation: nope 0.32s; }
+
+  .block.ghost {
+    position: fixed;
+    left: 0;
+    top: 0;
+    right: auto;
+    z-index: 50;
+    pointer-events: none;
+    rotate: -1.5deg;
+    scale: 1.03;
+    transform-origin: 30% 20%;
+    border-color: color-mix(in srgb, var(--c) 70%, transparent);
+    box-shadow: inset 3px 0 0 var(--c), 0 22px 40px -14px rgba(0, 0, 0, 0.8), 0 0 28px -6px var(--c);
+    animation: ghost-in 0.14s ease-out;
+    transition: border-color 0.12s, opacity 0.12s;
+  }
+  .block.ghost.bad { border-color: var(--bad); opacity: 0.85; }
+  .block.ghost.out { transition: opacity 0.16s, scale 0.16s; opacity: 0; scale: 0.9; }
+
+  .preview {
+    position: absolute;
+    left: 3px;
+    right: 3px;
+    top: calc(var(--slot-h) * var(--s) + 1px);
+    height: calc(var(--slot-h) * var(--n) - 2px);
+    z-index: 3;
+    border-radius: 7px;
+    border: 1.5px dashed color-mix(in srgb, var(--c) 85%, transparent);
+    background: color-mix(in srgb, var(--c) 12%, transparent);
+    pointer-events: none;
+    transition: top 0.07s ease-out;
+  }
+  .preview.bad { border-color: var(--bad); background: rgba(255, 123, 135, 0.08); }
+
+  body.is-dragging, body.is-dragging * { cursor: grabbing !important; }
+
+  @keyframes land {
+    0% { scale: 0.9; opacity: 0; }
+    60% { scale: 1.03; opacity: 1; }
+    100% { scale: 1; }
+  }
+  @keyframes flash {
+    0% { box-shadow: inset 3px 0 0 var(--c), 0 0 0 1.5px var(--c), 0 0 26px var(--c); }
+    100% { box-shadow: inset 3px 0 0 var(--c), 0 0 0 0 transparent, 0 0 0 transparent; }
+  }
+  @keyframes ghost-in { from { scale: 0.92; opacity: 0.4; } }
+  @keyframes nope {
+    20% { translate: -3px 0; }
+    40% { translate: 3px 0; }
+    60% { translate: -2px 0; }
+    80% { translate: 2px 0; }
+  }
+
+  /* ---- Toast -------------------------------------------------------- */
+  .toast {
+    position: fixed;
+    left: 50%;
+    bottom: 22px;
+    z-index: 60;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    max-width: min(620px, calc(100vw - 32px));
+    padding: 10px 10px 10px 16px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: #1b1f27;
+    box-shadow: 0 24px 50px -20px #000;
+    translate: -50% 16px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s, translate 0.2s;
+  }
+  .toast.show { opacity: 1; translate: -50% 0; pointer-events: auto; }
+  .toast button {
+    flex: none;
+    padding: 5px 10px;
+    border: 0;
+    border-radius: 7px;
+    background: rgba(163, 147, 255, 0.14);
+    color: #c9bdff;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .toast button:hover { background: rgba(163, 147, 255, 0.24); }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.001ms !important;
+    }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <div class="brand">
+      <h1>Week Puzzle</h1>
+      <small id="saveNote">Prototype · saved in this browser</small>
+    </div>
+    <div class="progress-wrap">
+      <div class="pg" id="pg" role="status">
+        <div class="pg-glow"></div>
+        <div class="pg-inner">
+          <div class="pg-label" id="pgLabel"></div>
+          <div class="pg-bar" id="pgBar"></div>
+        </div>
+      </div>
+    </div>
+    <div class="actions">
+      <button class="btn" id="undoBtn" type="button" title="Undo (⌘Z / Ctrl+Z)">Undo</button>
+      <button class="btn" id="clearBtn" type="button" title="Take every unpinned piece off the board">Clear</button>
+      <button class="btn btn-primary" id="optBtn" type="button"
+        title="Pinned pieces stay put. Everything else gets rearranged, and missing pieces are added until each target is met.">
+        <span class="spark" aria-hidden="true">✦</span>Optimize
+      </button>
+    </div>
+  </header>
+
+  <aside class="tray" id="tray" aria-label="Pieces">
+    <div class="tray-scroll">
+      <h2>Pieces</h2>
+      <div class="piece-list" id="pieces"></div>
+      <div class="hints">
+        <p>Drag a piece onto the board. <b>Click</b> a placed piece to pin it; pinned pieces stay put when you optimize. Length changes apply to the next piece you drag in.</p>
+        <p><b>Optimize</b> follows three rules:</p>
+        <ul>
+          <li>Study only between 12 and 17</li>
+          <li>Gym never two days in a row</li>
+          <li>No day over 6 h, with a break between pieces</li>
+        </ul>
+      </div>
+    </div>
+  </aside>
+
+  <main class="board" id="board">
+    <div class="board-inner">
+      <div class="heads" id="heads"></div>
+      <div class="grid" id="grid"></div>
+    </div>
+  </main>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite">
+  <span id="toastMsg"></span>
+  <button id="toastUndo" type="button" hidden>Undo</button>
+</div>
+
+<script>
+(() => {
+  'use strict';
+
+  // ---------------------------------------------------------------------------
+  // Board and rules
+  // ---------------------------------------------------------------------------
+  const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  const START_HOUR = 8;
+  const END_HOUR = 23;
+  const SLOTS = (END_HOUR - START_HOUR) * 2; // 30-min slots per day
+  const slotAt = (h, m = 0) => (h - START_HOUR) * 2 + m / 30;
+
+  const PEAK = { from: slotAt(12), to: slotAt(17) }; // hard pieces only go here
+  const DAY_CAP = 12; // 6 h, in slots
+  // The rule asks for a 15-min break between pieces. The smallest gap on a
+  // 30-min grid is one empty slot, so that's what the optimizer leaves.
+  const BREAK = 1;
+
+  // `pref` is the start time the optimizer leans towards for that piece.
+  const PIECES = [
+    { id: 'work',     name: 'Work',     color: '#8fb4ff', dur: 8, target: 0, pref: slotAt(9) },
+    { id: 'gym',      name: 'Gym',      color: '#ff9e8e', dur: 2, target: 3, pref: slotAt(17, 30), spaced: true },
+    { id: 'study',    name: 'Study',    color: '#b9a3ff', dur: 3, target: 4, pref: slotAt(13), hard: true },
+    { id: 'chores',   name: 'Chores',   color: '#f2c77c', dur: 2, target: 0, pref: slotAt(10) },
+    { id: 'social',   name: 'Social',   color: '#f4a4cf', dur: 4, target: 0, pref: slotAt(19) },
+    { id: 'downtime', name: 'Downtime', color: '#86dcc4', dur: 2, target: 0, pref: slotAt(20, 30) },
+  ];
+  const PIECE = Object.fromEntries(PIECES.map(p => [p.id, p]));
+  const DUR_RANGE = [1, 16]; // 30 min to 8 h
+  const TARGET_RANGE = [0, 7];
+  const STORE_KEY = 'week-puzzle/v1';
+
+  // ---------------------------------------------------------------------------
+  // Helpers
+  // ---------------------------------------------------------------------------
+  const $ = id => document.getElementById(id);
+  const uid = () => 'b' + Math.random().toString(36).slice(2, 10);
+  const clampInt = (v, lo, hi, fallback) => Number.isInteger(v) ? Math.min(hi, Math.max(lo, v)) : fallback;
+  const overlaps = (s1, n1, s2, n2, gap = 0) => s1 < s2 + n2 + gap && s2 < s1 + n1 + gap;
+  const time = s => {
+    const m = START_HOUR * 60 + s * 30;
+    return `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`;
+  };
+  const hours = n => n === 1 ? '30 min' : `${n / 2} h`;
+  const listCounts = counts => PIECES.filter(P => counts[P.id]).map(P => `${counts[P.id]} ${P.name}`).join(', ');
+  const capitalize = s => s.charAt(0).toUpperCase() + s.slice(1);
+
+  // ---------------------------------------------------------------------------
+  // State and saving
+  // ---------------------------------------------------------------------------
+  let storageOk = true;
+
+  function freshState() {
+    return {
+      pieces: Object.fromEntries(PIECES.map(p => [p.id, { dur: p.dur, target: p.target }])),
+      blocks: [], // { id, p: piece id, d: day 0-6, s: start slot, n: length in slots, locked }
+    };
+  }
+
+  function loadState() {
+    const state = freshState();
+    let raw = null;
+    try { raw = localStorage.getItem(STORE_KEY); } catch { storageOk = false; }
+    if (!raw) return state;
+    let data;
+    try { data = JSON.parse(raw); } catch { return state; }
+    if (!data || typeof data !== 'object') return state;
+
+    for (const P of PIECES) {
+      const saved = data.pieces && data.pieces[P.id];
+      if (!saved) continue;
+      state.pieces[P.id].dur = clampInt(saved.dur, ...DUR_RANGE, P.dur);
+      state.pieces[P.id].target = clampInt(saved.target, ...TARGET_RANGE, P.target);
+    }
+    for (const b of Array.isArray(data.blocks) ? data.blocks : []) {
+      if (!b || !PIECE[b.p] || ![b.d, b.s, b.n].every(Number.isInteger)) continue;
+      if (b.d < 0 || b.d > 6 || b.n < 1 || b.s < 0 || b.s + b.n > SLOTS) continue;
+      if (state.blocks.some(o => o.d === b.d && overlaps(o.s, o.n, b.s, b.n))) continue;
+      const id = typeof b.id === 'string' && /^[\w-]+$/.test(b.id) ? b.id : uid();
+      state.blocks.push({ id, p: b.p, d: b.d, s: b.s, n: b.n, locked: !!b.locked });
+    }
+    return state;
+  }
+
+  function save() {
+    if (!storageOk) return;
+    try {
+      localStorage.setItem(STORE_KEY, JSON.stringify(state));
+    } catch {
+      storageOk = false;
+      showStorageWarning();
+    }
+  }
+
+  function showStorageWarning() {
+    const note = $('saveNote');
+    note.textContent = 'Storage blocked: changes won’t survive a refresh';
+    note.classList.add('warn');
+  }
+
+  const state = loadState();
+  const undoStack = [];
+
+  function snapshot() {
+    undoStack.push(JSON.stringify(state.blocks));
+    if (undoStack.length > 60) undoStack.shift();
+  }
+
+  function undo() {
+    const prev = undoStack.pop();
+    if (!prev) return;
+    state.blocks = JSON.parse(prev);
+    commit();
+    toast('Undone.');
+  }
+
+  function commit(landed = [], stagger = false) {
+    save();
+    render(landed, stagger);
+  }
+
+  const blockById = id => state.blocks.find(b => b.id === id);
+
+  function fits(d, s, n, ignoreId) {
+    if (s < 0 || s + n > SLOTS) return false;
+    return !state.blocks.some(b => b.id !== ignoreId && b.d === d && overlaps(s, n, b.s, b.n));
+  }
+
+  function countByPiece() {
+    const counts = Object.fromEntries(PIECES.map(p => [p.id, 0]));
+    state.blocks.forEach(b => counts[b.p]++);
+    return counts;
+  }
+
+  // ---------------------------------------------------------------------------
+  // Board mutations
+  // ---------------------------------------------------------------------------
+  function addBlock(p, d, s) {
+    snapshot();
+    const block = { id: uid(), p, d, s, n: state.pieces[p].dur, locked: false };
+    state.blocks.push(block);
+    commit([block.id]);
+  }
+
+  function moveBlock(id, d, s) {
+    const b = blockById(id);
+    if (b.d === d && b.s === s) { render(); return; }
+    snapshot();
+    b.d = d;
+    b.s = s;
+    commit([id]);
+  }
+
+  function removeBlock(id) {
+    const b = blockById(id);
+    if (!b) return;
+    snapshot();
+    state.blocks = state.blocks.filter(o => o.id !== id);
+    commit();
+    toast(`Removed ${PIECE[b.p].name} (${DAYS[b.d]} ${time(b.s)}).`, { undo: true });
+  }
+
+  function toggleLock(id) {
+    const b = blockById(id);
+    snapshot();
+    b.locked = !b.locked;
+    commit();
+  }
+
+  function clearUnpinned() {
+    const loose = state.blocks.filter(b => !b.locked).length;
+    if (!loose) return;
+    snapshot();
+    state.blocks = state.blocks.filter(b => b.locked);
+    commit();
+    toast(`Cleared ${loose} unpinned piece${loose === 1 ? '' : 's'}. Pinned ones stayed.`, { undo: true });
+  }
+
+  function setPieceSetting(p, field, step) {
+    const range = field === 'dur' ? DUR_RANGE : TARGET_RANGE;
+    const cfg = state.pieces[p];
+    cfg[field] = Math.min(range[1], Math.max(range[0], cfg[field] + step));
+    save();
+    renderTray();
+    renderProgress();
+  }
+
+  // ---------------------------------------------------------------------------
+  // Optimizer
+  // ---------------------------------------------------------------------------
+  // Pinned pieces never move. Every unpinned piece gets a fresh spot, and new
+  // pieces are added until each target is met. A small depth-first search tries
+  // the best-scoring spots first and backtracks when a later piece has nowhere
+  // to go. If everything can't fit, it keeps the arrangement that placed most.
+  function planWeek() {
+    const pinned = state.blocks.filter(b => b.locked);
+    const loose = state.blocks.filter(b => !b.locked);
+
+    const todo = [];
+    for (const P of PIECES) {
+      const mine = loose.filter(b => b.p === P.id);
+      mine.forEach(b => todo.push({ p: P.id, n: b.n }));
+      const pinnedCount = pinned.filter(b => b.p === P.id).length;
+      const missing = state.pieces[P.id].target - pinnedCount - mine.length;
+      for (let i = 0; i < missing; i++) todo.push({ p: P.id, n: state.pieces[P.id].dur });
+    }
+    // Most constrained first: peak-only pieces, then spaced-out ones, then long ones.
+    const rank = it => PIECE[it.p].hard ? 0 : PIECE[it.p].spaced ? 1 : 2;
+    todo.sort((a, b) => rank(a) - rank(b) || b.n - a.n);
+
+    const days = DAYS.map(() => []);
+    const load = DAYS.map(() => 0);
+    const put = (d, s, n, p) => { days[d].push({ s, n, p }); load[d] += n; };
+    const unput = d => { load[d] -= days[d].pop().n; };
+    const count = (p, d) => d < 0 || d > 6 ? 0 : days[d].filter(b => b.p === p).length;
+    pinned.forEach(b => put(b.d, b.s, b.n, b.p));
+    // Spots unpinned pieces already sit in get a bonus, so re-running the
+    // optimizer keeps your manual fixes as long as they follow the rules.
+    const wasHere = new Set(loose.map(b => `${b.p}:${b.d}:${b.s}:${b.n}`));
+
+    function spots(it) {
+      const P = PIECE[it.p];
+      const lo = P.hard ? PEAK.from : 0;
+      const hi = (P.hard ? PEAK.to : SLOTS) - it.n;
+      const found = [];
+      for (let d = 0; d < 7; d++) {
+        if (load[d] + it.n > DAY_CAP) continue;
+        const same = count(it.p, d);
+        const nextDoor = count(it.p, d - 1) + count(it.p, d + 1);
+        if (P.spaced && (same || nextDoor)) continue;
+        const onDay = [];
+        for (let s = lo; s <= hi; s++) {
+          if (days[d].some(b => overlaps(s, it.n, b.s, b.n, BREAK))) continue;
+          let score = -0.3 * (load[d] + it.n)      // lighter days first
+            - 4 * same - nextDoor                   // spread repeats across the week
+            - 0.25 * Math.abs(s - P.pref);          // near the piece's usual time
+          if (!P.hard && overlaps(s, it.n, PEAK.from, PEAK.to - PEAK.from)) score -= 1.5; // keep peak free
+          if (wasHere.has(`${it.p}:${d}:${s}:${it.n}`)) score += 3;
+          onDay.push({ d, s, score });
+        }
+        onDay.sort((a, b) => b.score - a.score);
+        found.push(...onDay.slice(0, 2));
+      }
+      return found.sort((a, b) => b.score - a.score).slice(0, 6);
+    }
+
+    const pick = new Array(todo.length).fill(null);
+    let best = { placed: -1, pick: [] };
+    let budget = 5000;
+    (function search(i, placed) {
+      if (--budget < 0) return true;
+      if (placed + todo.length - i <= best.placed) return false;
+      if (i === todo.length) {
+        best = { placed, pick: pick.slice() };
+        return placed === todo.length;
+      }
+      const it = todo[i];
+      for (const spot of spots(it)) {
+        put(spot.d, spot.s, it.n, it.p);
+        pick[i] = spot;
+        const done = search(i + 1, placed + 1);
+        unput(spot.d);
+        if (done) return true;
+      }
+      pick[i] = null;
+      return search(i + 1, placed);
+    })(0, 0);
+
+    // Hand the old ids back out so pieces that didn't move stay the same piece.
+    const items = todo.map((it, i) => ({ ...it, spot: best.pick[i], id: null }));
+    const pool = loose.slice();
+    const takeFromPool = match => {
+      const j = pool.findIndex(match);
+      return j < 0 ? null : pool.splice(j, 1)[0].id;
+    };
+    for (const it of items) {
+      if (!it.spot) continue;
+      it.id = takeFromPool(b => b.p === it.p && b.n === it.n && b.d === it.spot.d && b.s === it.spot.s);
+      it.stayed = !!it.id;
+    }
+    const added = {}, short = {}, landed = [];
+    let moved = 0;
+    for (const it of items) {
+      if (!it.spot) { short[it.p] = (short[it.p] || 0) + 1; continue; }
+      if (it.stayed) continue;
+      it.id = takeFromPool(b => b.p === it.p && b.n === it.n);
+      if (it.id) moved++;
+      else { it.id = uid(); added[it.p] = (added[it.p] || 0) + 1; }
+      landed.push(it.id);
+    }
+    const blocks = pinned.map(b => ({ ...b }))
+      .concat(items.filter(it => it.spot).map(it => ({ id: it.id, p: it.p, d: it.spot.d, s: it.spot.s, n: it.n, locked: false })));
+    return { blocks, landed, added, moved, short, removed: pool.length };
+  }
+
+  function runOptimizer() {
+    const plan = planWeek();
+    const signature = blocks => blocks.map(b => `${b.id}:${b.d}:${b.s}:${b.n}:${b.locked}`).sort().join('|');
+    const shortText = listCounts(plan.short);
+    const advice = ' Unpin something or lower a target.';
+
+    if (signature(plan.blocks) === signature(state.blocks)) {
+      toast(shortText
+        ? `Nothing better to do: there's still no room for ${shortText}.${advice}`
+        : 'Nothing to change. This week already follows the rules.');
+      return;
+    }
+    snapshot();
+    state.blocks = plan.blocks;
+    commit(plan.landed, true);
+
+    const parts = [];
+    const addedText = listCounts(plan.added);
+    if (addedText) parts.push(`added ${addedText}`);
+    if (plan.moved) parts.push(`moved ${plan.moved}`);
+    if (plan.removed) parts.push(`took ${plan.removed} off the board`);
+    let msg = capitalize(parts.join(' · ') || 'rearranged');
+    msg += shortText ? `. Couldn't fit ${shortText}.${advice}` : '.';
+    toast(msg, { undo: true, ms: 7000 });
+  }
+
+  // ---------------------------------------------------------------------------
+  // Build the static parts
+  // ---------------------------------------------------------------------------
+  const board = $('board');
+  const tray = $('tray');
+  const grid = $('grid');
+  const heads = $('heads');
+  const dayCols = [];
+  const dayHeads = [];
+  const trayUI = {};
+  let slotH = 22;
+
+  function buildBoard() {
+    heads.appendChild(document.createElement('div'));
+    DAYS.forEach(name => {
+      const head = document.createElement('div');
+      head.className = 'day-head';
+      head.innerHTML = `<span class="dn">${name}</span><span class="dt"></span>`;
+      heads.appendChild(head);
+      dayHeads.push(head);
+    });
+
+    const gutter = document.createElement('div');
+    gutter.className = 'gutter';
+    for (let h = START_HOUR; h <= END_HOUR; h++) {
+      const label = document.createElement('div');
+      label.className = 'hour';
+      label.style.setProperty('--i', h - START_HOUR);
+      label.textContent = `${String(h).padStart(2, '0')}:00`;
+      gutter.appendChild(label);
+    }
+    gutter.insertAdjacentHTML('beforeend', '<div class="peak-mark" title="Peak hours: Study goes here"><span>peak</span></div>');
+    grid.appendChild(gutter);
+
+    DAYS.forEach((name, d) => {
+      const col = document.createElement('div');
+      col.className = 'day';
+      col.dataset.day = d;
+      col.setAttribute('aria-label', name);
+      col.innerHTML = '<div class="peak"></div>';
+      grid.appendChild(col);
+      dayCols.push(col);
+    });
+
+    grid.insertAdjacentHTML('beforeend',
+      '<div class="empty" id="empty"><p>Start with the fixed stuff: drag in your work shifts and classes, then click each one to pin it. Then hit <b>Optimize</b>.</p></div>');
+  }
+
+  function buildTray() {
+    const list = $('pieces');
+    for (const P of PIECES) {
+      const card = document.createElement('div');
+      card.className = 'piece';
+      card.dataset.piece = P.id;
+      card.style.setProperty('--c', P.color);
+      card.title = `Drag ${P.name} onto the board`;
+      card.innerHTML = `
+        <div class="p-top">
+          <span class="p-name">${P.name}${P.hard ? '<span class="p-tag">hard</span>' : ''}</span>
+          <span class="p-count"></span>
+        </div>
+        <div class="pips" aria-hidden="true"></div>
+        <div class="p-ctrls">
+          <div class="stepper" title="Length of the next ${P.name} you drag in">
+            <button type="button" data-field="dur" data-step="-1" aria-label="Shorter ${P.name}">−</button>
+            <output aria-live="polite"></output>
+            <button type="button" data-field="dur" data-step="1" aria-label="Longer ${P.name}">+</button>
+          </div>
+          <div class="stepper" title="How many ${P.name} pieces you want this week">
+            <button type="button" data-field="target" data-step="-1" aria-label="Lower ${P.name} target">−</button>
+            <output aria-live="polite"></output>
+            <button type="button" data-field="target" data-step="1" aria-label="Raise ${P.name} target">+</button>
+          </div>
+        </div>`;
+      list.appendChild(card);
+      const [dur, target] = card.querySelectorAll('output');
+      const buttons = card.querySelectorAll('button');
+      trayUI[P.id] = {
+        count: card.querySelector('.p-count'),
+        pips: card.querySelector('.pips'),
+        dur, target,
+        durDown: buttons[0], durUp: buttons[1], targetDown: buttons[2], targetUp: buttons[3],
+      };
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // Rendering
+  // ---------------------------------------------------------------------------
+  const LOCK_ICON = '<svg class="lock" viewBox="0 0 16 16" aria-hidden="true"><path d="M5 7V5.2a3 3 0 0 1 6 0V7" fill="none" stroke="currentColor" stroke-width="1.7"/><rect x="3" y="7" width="10" height="7.5" rx="1.8" fill="currentColor"/></svg>';
+
+  function blockHTML(P, s, n) {
+    return `<div class="b-name">${LOCK_ICON}<span>${P.name}</span></div><div class="b-time">${time(s)}–${time(s + n)}</div>`;
+  }
+
+  function render(landed = [], stagger = false) {
+    renderBlocks(landed, stagger);
+    renderHeads();
+    renderTray();
+    renderProgress();
+    $('undoBtn').disabled = !undoStack.length;
+    $('clearBtn').disabled = !state.blocks.some(b => !b.locked);
+    $('empty').hidden = state.blocks.length > 0;
+  }
+
+  function renderBlocks(landed, stagger) {
+    const focused = document.activeElement && document.activeElement.classList.contains('block')
+      ? document.activeElement.dataset.id : null;
+    board.querySelectorAll('.day .block').forEach(node => node.remove());
+
+    const order = state.blocks.filter(b => landed.includes(b.id))
+      .sort((a, b) => a.d - b.d || a.s - b.s).map(b => b.id);
+
+    for (const b of state.blocks) {
+      const P = PIECE[b.p];
+      const node = document.createElement('div');
+      node.className = 'block' + (b.locked ? ' locked' : '') + (b.n === 1 ? ' tiny' : '');
+      node.dataset.id = b.id;
+      node.style.setProperty('--c', P.color);
+      node.style.setProperty('--s', b.s);
+      node.style.setProperty('--n', b.n);
+      node.tabIndex = 0;
+      node.setAttribute('role', 'button');
+      node.setAttribute('aria-pressed', String(b.locked));
+      node.setAttribute('aria-label',
+        `${P.name}, ${DAYS[b.d]} ${time(b.s)} to ${time(b.s + b.n)}${b.locked ? ', pinned' : ''}. ` +
+        `Enter to ${b.locked ? 'unpin' : 'pin'}, Delete to remove.`);
+      node.title = b.locked ? 'Pinned. Click to unpin.' : 'Drag to move. Click to pin.';
+      node.innerHTML = blockHTML(P, b.s, b.n) +
+        '<button class="b-x" type="button" tabindex="-1" aria-label="Remove">×</button>';
+      const i = order.indexOf(b.id);
+      if (i >= 0) {
+        node.classList.add('land');
+        if (stagger) node.style.animationDelay = `${i * 45}ms`;
+      }
+      dayCols[b.d].appendChild(node);
+    }
+
+    if (focused) {
+      const again = board.querySelector(`.block[data-id="${CSS.escape(focused)}"]`);
+      if (again) again.focus();
+    }
+  }
+
+  function renderHeads() {
+    const load = DAYS.map(() => 0);
+    state.blocks.forEach(b => { load[b.d] += b.n; });
+    dayHeads.forEach((head, d) => {
+      const total = head.querySelector('.dt');
+      total.textContent = load[d] ? hours(load[d]) : '';
+      total.classList.toggle('over', load[d] > DAY_CAP);
+      total.title = load[d] > DAY_CAP ? 'Over 6 h: the optimizer won’t add anything here' : '';
+    });
+  }
+
+  function renderTray() {
+    const counts = countByPiece();
+    for (const P of PIECES) {
+      const ui = trayUI[P.id];
+      const cfg = state.pieces[P.id];
+      ui.dur.textContent = hours(cfg.dur);
+      ui.target.textContent = cfg.target ? `${cfg.target}× / wk` : 'no target';
+      ui.target.classList.toggle('off', !cfg.target);
+      ui.durDown.disabled = cfg.dur <= DUR_RANGE[0];
+      ui.durUp.disabled = cfg.dur >= DUR_RANGE[1];
+      ui.targetDown.disabled = cfg.target <= TARGET_RANGE[0];
+      ui.targetUp.disabled = cfg.target >= TARGET_RANGE[1];
+      ui.count.textContent = cfg.target ? `${counts[P.id]}/${cfg.target}` : counts[P.id] ? `${counts[P.id]} placed` : '';
+      ui.count.classList.toggle('met', cfg.target > 0 && counts[P.id] >= cfg.target);
+      if (ui.pips.childElementCount !== cfg.dur) {
+        ui.pips.replaceChildren(...Array.from({ length: cfg.dur }, () => {
+          const pip = document.createElement('i');
+          pip.className = 'pip';
+          return pip;
+        }));
+      }
+    }
+  }
+
+  let progressKey = '';
+  let wasComplete = null;
+
+  function renderProgress() {
+    const pg = $('pg');
+    const label = $('pgLabel');
+    const bar = $('pgBar');
+    const counts = countByPiece();
+    const tracked = PIECES.filter(P => state.pieces[P.id].target > 0);
+
+    if (!tracked.length) {
+      label.textContent = 'No targets set. Give a piece a weekly target to track it.';
+      bar.replaceChildren();
+      progressKey = '';
+      pg.classList.remove('complete');
+      wasComplete = false;
+      return;
+    }
+
+    label.innerHTML = tracked.map(P => {
+      const met = counts[P.id] >= state.pieces[P.id].target;
+      return `<span class="pg-item${met ? ' met' : ''}" style="--c:${P.color}"><b>${P.name}</b> ${counts[P.id]}/${state.pieces[P.id].target}</span>`;
+    }).join('<span class="pg-sep">·</span>');
+    pg.setAttribute('aria-label', tracked.map(P => `${P.name} ${counts[P.id]} of ${state.pieces[P.id].target}`).join(', '));
+
+    const key = tracked.map(P => `${P.id}:${state.pieces[P.id].target}`).join('|');
+    if (key !== progressKey) {
+      progressKey = key;
+      bar.replaceChildren(...tracked.map(P => {
+        const seg = document.createElement('span');
+        seg.className = 'pg-seg';
+        seg.dataset.piece = P.id;
+        seg.style.setProperty('--c', P.color);
+        seg.style.flexGrow = state.pieces[P.id].target;
+        seg.appendChild(document.createElement('i'));
+        return seg;
+      }));
+    }
+    for (const seg of bar.children) {
+      const t = state.pieces[seg.dataset.piece].target;
+      seg.firstChild.style.width = `${Math.min(1, counts[seg.dataset.piece] / t) * 100}%`;
+    }
+
+    const complete = tracked.every(P => counts[P.id] >= state.pieces[P.id].target);
+    pg.classList.toggle('complete', complete);
+    if (complete && wasComplete === false) {
+      pg.classList.add('celebrate');
+      setTimeout(() => pg.classList.remove('celebrate'), 700);
+    }
+    wasComplete = complete;
+  }
+
+  function renderNow() {
+    const now = new Date();
+    const today = (now.getDay() + 6) % 7; // Monday = 0
+    dayHeads.forEach((head, d) => head.classList.toggle('today', d === today));
+    dayCols.forEach((col, d) => col.classList.toggle('today', d === today));
+
+    let line = grid.querySelector('.now');
+    const minutes = now.getHours() * 60 + now.getMinutes() - START_HOUR * 60;
+    if (minutes < 0 || minutes > (END_HOUR - START_HOUR) * 60) {
+      if (line) line.remove();
+      return;
+    }
+    if (!line) {
+      line = document.createElement('div');
+      line.className = 'now';
+    }
+    line.style.top = `calc(var(--slot-h) * ${minutes / 30})`;
+    if (line.parentNode !== dayCols[today]) dayCols[today].appendChild(line);
+  }
+
+  // Size the slots so the whole day fits on screen without scrolling.
+  function fitSlots() {
+    const top = grid.getBoundingClientRect().top + board.scrollTop;
+    const available = window.innerHeight - top - 28;
+    slotH = Math.max(18, Math.min(32, Math.floor(available / SLOTS)));
+    document.documentElement.style.setProperty('--slot-h', `${slotH}px`);
+  }
+
+  // ---------------------------------------------------------------------------
+  // Toast
+  // ---------------------------------------------------------------------------
+  let toastTimer = null;
+  function toast(message, { undo: withUndo = false, ms = 4500 } = {}) {
+    $('toastMsg').textContent = message;
+    $('toastUndo').hidden = !withUndo;
+    $('toast').classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => $('toast').classList.remove('show'), ms);
+  }
+
+  // ---------------------------------------------------------------------------
+  // Drag and drop (pointer events, so mouse, trackpad and touch all work)
+  // ---------------------------------------------------------------------------
+  let ptr = null;
+
+  function startPointer(e, node, source) {
+    if (e.button !== 0 || ptr) return;
+    const rect = node.getBoundingClientRect();
+    ptr = {
+      ...source,
+      node,
+      pointerId: e.pointerId,
+      x0: e.clientX,
+      y0: e.clientY,
+      offX: e.clientX - rect.left,
+      offY: e.clientY - rect.top,
+      active: false,
+      refused: false,
+      target: null,
+    };
+    try { node.setPointerCapture(e.pointerId); } catch { /* not supported: window listeners still work */ }
+    window.addEventListener('pointermove', onPointerMove);
+    window.addEventListener('pointerup', onPointerUp);
+    window.addEventListener('pointercancel', onPointerCancel);
+  }
+
+  function stopListening() {
+    window.removeEventListener('pointermove', onPointerMove);
+    window.removeEventListener('pointerup', onPointerUp);
+    window.removeEventListener('pointercancel', onPointerCancel);
+  }
+
+  function onPointerMove(e) {
+    if (!ptr || e.pointerId !== ptr.pointerId) return;
+    if (!ptr.active && !ptr.refused) {
+      if (Math.hypot(e.clientX - ptr.x0, e.clientY - ptr.y0) < 5) return;
+      if (ptr.kind === 'block' && blockById(ptr.id).locked) {
+        ptr.refused = true;
+        shake(ptr.node);
+        toast('That piece is pinned. Click it to unpin it first.');
+        return;
+      }
+      beginDrag();
+    }
+    if (ptr.active) updateDrag(e.clientX, e.clientY);
+  }
+
+  function onPointerUp(e) {
+    if (!ptr || e.pointerId !== ptr.pointerId) return;
+    const p = ptr;
+    stopListening();
+    ptr = null;
+    if (p.active) {
+      finishDrag(p);
+    } else if (!p.refused) {
+      if (p.kind === 'block') toggleLock(p.id);
+      else { shake(p.node); toast(`Drag ${PIECE[p.p].name} onto the board to place it.`); }
+    }
+  }
+
+  function onPointerCancel(e) {
+    if (!ptr || e.pointerId !== ptr.pointerId) return;
+    cancelDrag();
+  }
+
+  function cancelDrag() {
+    if (!ptr) return;
+    const p = ptr;
+    stopListening();
+    ptr = null;
+    if (p.active) {
+      p.target = null;
+      finishDrag(p);
+    }
+  }
+
+  function shake(node) {
+    node.classList.remove('nope');
+    void node.offsetWidth; // restart the animation
+    node.classList.add('nope');
+    node.addEventListener('animationend', () => node.classList.remove('nope'), { once: true });
+  }
+
+  function beginDrag() {
+    ptr.active = true;
+    const b = ptr.kind === 'block' ? blockById(ptr.id) : null;
+    ptr.piece = b ? b.p : ptr.p;
+    ptr.n = b ? b.n : state.pieces[ptr.p].dur;
+
+    const width = dayCols[0].getBoundingClientRect().width - 6;
+    const ghost = document.createElement('div');
+    ghost.className = 'block ghost' + (ptr.n === 1 ? ' tiny' : '');
+    ghost.style.setProperty('--c', PIECE[ptr.piece].color);
+    ghost.style.width = `${width}px`;
+    ghost.style.height = `${ptr.n * slotH - 2}px`;
+    ghost.innerHTML = `<div class="b-name"><span>${PIECE[ptr.piece].name}</span></div><div class="b-time">${hours(ptr.n)}</div>`;
+    document.body.appendChild(ghost);
+    ptr.ghost = ghost;
+
+    if (b) {
+      // Keep the grab point where it was on the block.
+      ptr.grabX = Math.min(ptr.offX, width - 4);
+      ptr.grabY = ptr.offY;
+      ptr.node.classList.add('lifted');
+      tray.classList.add('drop-remove');
+    } else {
+      // From the tray: hold it by the top slot, centred.
+      ptr.grabX = width / 2;
+      ptr.grabY = slotH / 2;
+    }
+
+    const preview = document.createElement('div');
+    preview.className = 'preview';
+    preview.style.setProperty('--c', PIECE[ptr.piece].color);
+    preview.style.setProperty('--n', ptr.n);
+    ptr.preview = preview;
+    document.body.classList.add('is-dragging');
+  }
+
+  function updateDrag(x, y) {
+    ptr.ghost.style.translate = `${x - ptr.grabX}px ${y - ptr.grabY}px`;
+    const t = dropTarget(x, y);
+    ptr.target = t;
+
+    tray.classList.toggle('hot', !!(t && t.remove));
+    ptr.ghost.classList.toggle('bad', !!(t && !t.ok && !t.remove));
+    const timeLabel = ptr.ghost.querySelector('.b-time');
+
+    if (!t || t.remove) {
+      ptr.preview.remove();
+      timeLabel.textContent = t ? 'Remove' : hours(ptr.n);
+      return;
+    }
+    ptr.preview.classList.toggle('bad', !t.ok);
+    ptr.preview.style.setProperty('--s', t.s);
+    if (ptr.preview.parentNode !== dayCols[t.d]) {
+      // Jumping columns: skip the glide so it doesn't slide in from elsewhere.
+      ptr.preview.style.transition = 'none';
+      dayCols[t.d].appendChild(ptr.preview);
+      void ptr.preview.offsetWidth;
+      ptr.preview.style.transition = '';
+    }
+    timeLabel.textContent = t.ok ? `${DAYS[t.d]} ${time(t.s)}–${time(t.s + ptr.n)}` : 'No room here';
+  }
+
+  // Where would the piece land if dropped at (x, y)? Snaps to the nearest slot
+  // and, if that spot is taken, to a free one up to an hour away.
+  function dropTarget(x, y) {
+    if (ptr.kind === 'block') {
+      const r = tray.getBoundingClientRect();
+      if (x >= r.left && x <= r.right && y >= r.top && y <= r.bottom) return { remove: true };
+    }
+    for (let d = 0; d < 7; d++) {
+      const r = dayCols[d].getBoundingClientRect();
+      if (x < r.left || x >= r.right) continue;
+      if (y < r.top - slotH * 2 || y > r.bottom + slotH * 2) return null;
+      const raw = (y - ptr.grabY - r.top) / slotH;
+      const s = Math.max(0, Math.min(SLOTS - ptr.n, Math.round(raw)));
+      const ignore = ptr.kind === 'block' ? ptr.id : null;
+      if (fits(d, s, ptr.n, ignore)) return { d, s, ok: true };
+      const dir = raw >= s ? 1 : -1;
+      for (let k = 1; k <= 2; k++) {
+        for (const alt of [s + dir * k, s - dir * k]) {
+          if (fits(d, alt, ptr.n, ignore)) return { d, s: alt, ok: true };
+        }
+      }
+      return { d, s, ok: false };
+    }
+    return null;
+  }
+
+  function finishDrag(p) {
+    const t = p.target;
+    p.preview.remove();
+    tray.classList.remove('drop-remove', 'hot');
+    document.body.classList.remove('is-dragging');
+
+    if (t && (t.ok || t.remove)) {
+      p.ghost.remove();
+      if (t.remove) removeBlock(p.id);
+      else if (p.kind === 'tray') addBlock(p.p, t.d, t.s);
+      else moveBlock(p.id, t.d, t.s);
+      return;
+    }
+    if (p.node.isConnected) p.node.classList.remove('lifted');
+    p.ghost.classList.add('out');
+    setTimeout(() => p.ghost.remove(), 180);
+  }
+
+  // ---------------------------------------------------------------------------
+  // Events
+  // ---------------------------------------------------------------------------
+  board.addEventListener('pointerdown', e => {
+    if (e.target.closest('.b-x')) return;
+    const node = e.target.closest('.block');
+    if (node) startPointer(e, node, { kind: 'block', id: node.dataset.id });
+  });
+
+  board.addEventListener('click', e => {
+    const x = e.target.closest('.b-x');
+    if (x) removeBlock(x.closest('.block').dataset.id);
+  });
+
+  board.addEventListener('keydown', e => {
+    const node = e.target.closest('.block');
+    if (!node) return;
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      toggleLock(node.dataset.id);
+    } else if (e.key === 'Delete' || e.key === 'Backspace') {
+      e.preventDefault();
+      removeBlock(node.dataset.id);
+    }
+  });
+
+  tray.addEventListener('pointerdown', e => {
+    if (e.target.closest('.stepper')) return;
+    const card = e.target.closest('.piece');
+    if (card) startPointer(e, card, { kind: 'tray', p: card.dataset.piece });
+  });
+
+  tray.addEventListener('click', e => {
+    const btn = e.target.closest('.stepper button');
+    if (btn) setPieceSetting(btn.closest('.piece').dataset.piece, btn.dataset.field, Number(btn.dataset.step));
+  });
+
+  $('optBtn').addEventListener('click', runOptimizer);
+  $('clearBtn').addEventListener('click', clearUnpinned);
+  $('undoBtn').addEventListener('click', undo);
+  $('toastUndo').addEventListener('click', () => {
+    $('toast').classList.remove('show');
+    undo();
+  });
+
+  window.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && ptr) {
+      cancelDrag();
+    } else if ((e.metaKey || e.ctrlKey) && !e.shiftKey && e.key.toLowerCase() === 'z') {
+      e.preventDefault();
+      undo();
+    }
+  });
+  window.addEventListener('blur', cancelDrag);
+  window.addEventListener('resize', fitSlots);
+
+  // ---------------------------------------------------------------------------
+  // Go
+  // ---------------------------------------------------------------------------
+  buildBoard();
+  buildTray();
+  if (!storageOk) showStorageWarning();
+  fitSlots();
+  render();
+  renderNow();
+  setInterval(renderNow, 60 * 1000);
+})();
+</script>
+</body>
+</html>
