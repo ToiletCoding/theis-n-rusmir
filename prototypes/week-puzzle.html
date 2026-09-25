@@ -238,6 +238,25 @@
   .pips { display: flex; flex-wrap: wrap; gap: 2px; min-height: 6px; }
   .pip { width: 9px; height: 6px; border-radius: 2px; background: var(--c); opacity: 0.75; }
   .p-ctrls { display: flex; gap: 6px; }
+  .p-days { display: flex; gap: 3px; }
+  .p-days button {
+    flex: 1;
+    height: 20px;
+    padding: 0;
+    border-radius: 5px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--faint);
+    font-size: 10px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .p-days button:hover { color: var(--text); }
+  .p-days button[aria-pressed="true"] {
+    color: color-mix(in srgb, var(--c) 70%, white);
+    background: color-mix(in srgb, var(--c) 16%, transparent);
+    border-color: color-mix(in srgb, var(--c) 35%, transparent);
+  }
   .stepper {
     flex: 1;
     display: flex;
@@ -330,6 +349,19 @@
     font-size: 12px;
     font-variant-numeric: tabular-nums;
     cursor: pointer;
+  }
+  .setting textarea {
+    width: 100%;
+    min-height: 124px;
+    padding: 8px 10px;
+    resize: vertical;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--panel-2);
+    color: var(--text);
+    font: inherit;
+    font-size: 12px;
+    line-height: 1.6;
   }
   .hints { margin-top: 6px; padding: 0 4px; color: var(--faint); font-size: 11.5px; line-height: 1.5; }
   .hints p { margin: 0 0 8px; }
@@ -667,11 +699,11 @@
       <div class="panel" id="panel-pieces" role="tabpanel" aria-labelledby="tab-pieces">
         <div class="piece-list" id="pieces"></div>
         <div class="hints">
-          <p>Drag a piece onto the board. <b>Click</b> a placed piece to pin it; pinned pieces stay put when you optimize. Length changes apply to the next piece you drag in.</p>
+          <p>Drag a piece onto the board. The day letters on a piece choose which days Optimize may use for it. <b>Click</b> a placed piece to pin it; pinned pieces stay put when you optimize. Length changes apply to the next piece you drag in.</p>
           <p><b>Optimize</b> follows three rules:</p>
           <ul>
             <li>Study only between 12 and 17</li>
-            <li>Gym never two days in a row</li>
+            <li id="gymRule">Gym never two days in a row</li>
             <li>No day over 6 h, with a break between pieces</li>
           </ul>
         </div>
@@ -684,6 +716,11 @@
             <label>From <select id="tfStart"></select></label>
             <label>To <select id="tfEnd"></select></label>
           </div>
+        </section>
+        <section class="setting">
+          <h3>Gym split</h3>
+          <p>One session per line, in order. Gym pieces get these names through the week, and Gym can then land on back-to-back days (still one session a day). Leave it empty for no split.</p>
+          <textarea id="splitInput" spellcheck="false" aria-label="Gym split sessions, one per line"></textarea>
         </section>
       </div>
     </div>
@@ -743,6 +780,7 @@
     { id: 'social',   name: 'Social',   color: '#f4a4cf', dur: 4, target: 0, pref: 19 },
     { id: 'downtime', name: 'Downtime', color: '#86dcc4', dur: 2, target: 0, pref: 20.5 },
   ];
+  const DEFAULT_SPLIT = ['Arms + Chest', 'Arms + Back', 'Legs + Forearms', 'Chest', 'Arms + Back'];
   const PIECE = Object.fromEntries(PIECES.map(p => [p.id, p]));
   const DUR_RANGE = [1, 16]; // 30 min to 8 h
   const TARGET_RANGE = [0, 7];
@@ -762,6 +800,7 @@
   const clock = h => `${String(h).padStart(2, '0')}:00`;
   const hours = n => n === 1 ? '30 min' : `${n / 2} h`;
   const listCounts = counts => PIECES.filter(P => counts[P.id]).map(P => `${counts[P.id]} ${P.name}`).join(', ');
+  const esc = str => str.replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const capitalize = s => s.charAt(0).toUpperCase() + s.slice(1);
 
   // ---------------------------------------------------------------------------
@@ -772,7 +811,13 @@
   function freshState() {
     return {
       frame: { ...DEFAULT_FRAME },
-      pieces: Object.fromEntries(PIECES.map(p => [p.id, { dur: p.dur, target: p.target }])),
+      split: DEFAULT_SPLIT.slice(),
+      // `days`: which days the optimizer may put this piece on (Mon first).
+      pieces: Object.fromEntries(PIECES.map(p => [p.id, {
+        dur: p.dur,
+        target: p.id === 'gym' ? DEFAULT_SPLIT.length : p.target,
+        days: DAYS.map(() => true),
+      }])),
       blocks: [], // { id, p: piece id, d: day 0-6, s: start slot, n: length in slots, locked }
     };
   }
@@ -794,9 +839,12 @@
       applyTimeFrame(state.frame);
     }
 
+    if (Array.isArray(data.split)) state.split = cleanSplit(data.split);
+
     for (const P of PIECES) {
       const saved = data.pieces && data.pieces[P.id];
       if (!saved) continue;
+      if (Array.isArray(saved.days) && saved.days.length === 7) state.pieces[P.id].days = saved.days.map(Boolean);
       state.pieces[P.id].dur = clampInt(saved.dur, ...DUR_RANGE, P.dur);
       state.pieces[P.id].target = clampInt(saved.target, ...TARGET_RANGE, P.target);
     }
@@ -808,6 +856,21 @@
       state.blocks.push({ id, p: b.p, d: b.d, s: b.s, n: b.n, locked: !!b.locked });
     }
     return state;
+  }
+
+  function cleanSplit(list) {
+    return list.filter(x => typeof x === 'string').map(x => x.trim().slice(0, 40)).filter(Boolean).slice(0, 7);
+  }
+
+  // With a split, the Nth Gym piece of the week (Mon first, earliest first)
+  // gets the Nth session name, wrapping around if there are more pieces.
+  function sessionNames() {
+    const names = {};
+    if (!state.split.length) return names;
+    state.blocks.filter(b => b.p === 'gym')
+      .sort((a, b) => a.d - b.d || a.s - b.s)
+      .forEach((b, i) => { names[b.id] = state.split[i % state.split.length]; });
+    return names;
   }
 
   function save() {
@@ -951,11 +1014,14 @@
       const lo = P.hard ? Math.max(0, PEAK.from) : 0;
       const hi = (P.hard ? Math.min(SLOTS, PEAK.to) : SLOTS) - it.n;
       const found = [];
+      const allowed = state.pieces[it.p].days;
+      // Gym is one session a day. Without a split it also skips a day in between.
+      const backToBackOk = state.split.length > 0;
       for (let d = 0; d < 7; d++) {
-        if (load[d] + it.n > DAY_CAP) continue;
+        if (!allowed[d] || load[d] + it.n > DAY_CAP) continue;
         const same = count(it.p, d);
         const nextDoor = count(it.p, d - 1) + count(it.p, d + 1);
-        if (P.spaced && (same || nextDoor)) continue;
+        if (P.spaced && (same || (nextDoor && !backToBackOk))) continue;
         const onDay = [];
         for (let s = lo; s <= hi; s++) {
           if (days[d].some(b => overlaps(s, it.n, b.s, b.n, BREAK))) continue;
@@ -1112,7 +1178,20 @@
     const option = h => `<option value="${h}">${clock(h)}</option>`;
     $('tfStart').innerHTML = Array.from({ length: 24 - MIN_FRAME_HOURS + 1 }, (_, h) => option(h)).join('');
     $('tfEnd').innerHTML = Array.from({ length: 24 - MIN_FRAME_HOURS + 1 }, (_, i) => option(i + MIN_FRAME_HOURS)).join('');
+    $('splitInput').value = state.split.join('\n');
     renderSettings();
+  }
+
+  function setSplit(text) {
+    const split = cleanSplit(text.split('\n'));
+    state.split = split;
+    if (split.length) state.pieces.gym.target = split.length;
+    save();
+    render();
+    $('splitInput').value = split.join('\n');
+    toast(split.length
+      ? `Gym split saved: ${split.length} sessions, so the Gym target is now ${split.length}×.`
+      : 'Gym split cleared. Gym goes back to never two days in a row.');
   }
 
   function renderSettings() {
@@ -1181,6 +1260,9 @@
             <output aria-live="polite"></output>
             <button type="button" data-field="target" data-step="1" aria-label="Raise ${P.name} target">+</button>
           </div>
+        </div>
+        <div class="p-days" role="group" aria-label="Days Optimize may use for ${P.name}">
+          ${DAYS.map((name, d) => `<button type="button" data-day="${d}" aria-pressed="true" aria-label="${name}">${name[0]}</button>`).join('')}
         </div>`;
       list.appendChild(card);
       const [dur, target] = card.querySelectorAll('output');
@@ -1190,6 +1272,7 @@
         pips: card.querySelector('.pips'),
         dur, target,
         durDown: buttons[0], durUp: buttons[1], targetDown: buttons[2], targetUp: buttons[3],
+        days: [...card.querySelectorAll('.p-days button')],
       };
     }
   }
@@ -1199,8 +1282,8 @@
   // ---------------------------------------------------------------------------
   const LOCK_ICON = '<svg class="lock" viewBox="0 0 16 16" aria-hidden="true"><path d="M5 7V5.2a3 3 0 0 1 6 0V7" fill="none" stroke="currentColor" stroke-width="1.7"/><rect x="3" y="7" width="10" height="7.5" rx="1.8" fill="currentColor"/></svg>';
 
-  function blockHTML(P, s, n) {
-    return `<div class="b-name">${LOCK_ICON}<span>${P.name}</span></div><div class="b-time">${time(s)}–${time(s + n)}</div>`;
+  function blockHTML(P, s, n, label) {
+    return `<div class="b-name">${LOCK_ICON}<span>${esc(label || P.name)}</span></div><div class="b-time">${time(s)}–${time(s + n)}</div>`;
   }
 
   function render(landed = [], stagger = false) {
@@ -1211,6 +1294,9 @@
     $('undoBtn').disabled = !undoStack.length;
     $('clearBtn').disabled = !state.blocks.some(b => !b.locked);
     $('empty').hidden = state.blocks.length > 0;
+    $('gymRule').textContent = state.split.length
+      ? 'Gym at most once a day (split, so back-to-back is fine)'
+      : 'Gym never two days in a row';
   }
 
   function renderBlocks(landed, stagger) {
@@ -1218,6 +1304,7 @@
       ? document.activeElement.dataset.id : null;
     board.querySelectorAll('.day .block').forEach(node => node.remove());
 
+    const sessions = sessionNames();
     const order = state.blocks.filter(b => landed.includes(b.id))
       .sort((a, b) => a.d - b.d || a.s - b.s).map(b => b.id);
 
@@ -1233,10 +1320,10 @@
       node.setAttribute('role', 'button');
       node.setAttribute('aria-pressed', String(b.locked));
       node.setAttribute('aria-label',
-        `${P.name}, ${DAYS[b.d]} ${time(b.s)} to ${time(b.s + b.n)}${b.locked ? ', pinned' : ''}. ` +
+        `${P.name}${sessions[b.id] ? ` (${sessions[b.id]})` : ''}, ${DAYS[b.d]} ${time(b.s)} to ${time(b.s + b.n)}${b.locked ? ', pinned' : ''}. ` +
         `Enter to ${b.locked ? 'unpin' : 'pin'}, Delete to remove.`);
       node.title = b.locked ? 'Pinned. Click to unpin.' : 'Drag to move. Click to pin.';
-      node.innerHTML = blockHTML(P, b.s, b.n) +
+      node.innerHTML = blockHTML(P, b.s, b.n, sessions[b.id]) +
         '<button class="b-x" type="button" tabindex="-1" aria-label="Remove">×</button>';
       const i = order.indexOf(b.id);
       if (i >= 0) {
@@ -1277,6 +1364,10 @@
       ui.targetUp.disabled = cfg.target >= TARGET_RANGE[1];
       ui.count.textContent = cfg.target ? `${counts[P.id]}/${cfg.target}` : counts[P.id] ? `${counts[P.id]} placed` : '';
       ui.count.classList.toggle('met', cfg.target > 0 && counts[P.id] >= cfg.target);
+      ui.days.forEach((btn, d) => {
+        btn.setAttribute('aria-pressed', String(cfg.days[d]));
+        btn.title = `${DAYS[d]}: ${cfg.days[d] ? 'Optimize may use this day' : 'Optimize skips this day'}`;
+      });
       if (ui.pips.childElementCount !== cfg.dur) {
         ui.pips.replaceChildren(...Array.from({ length: cfg.dur }, () => {
           const pip = document.createElement('i');
@@ -1595,12 +1686,21 @@
   });
 
   tray.addEventListener('pointerdown', e => {
-    if (e.target.closest('.stepper')) return;
+    if (e.target.closest('.stepper, .p-days')) return;
     const card = e.target.closest('.piece');
     if (card) startPointer(e, card, { kind: 'tray', p: card.dataset.piece });
   });
 
   tray.addEventListener('click', e => {
+    const day = e.target.closest('.p-days button');
+    if (day) {
+      const days = state.pieces[day.closest('.piece').dataset.piece].days;
+      const d = Number(day.dataset.day);
+      days[d] = !days[d];
+      save();
+      renderTray();
+      return;
+    }
     const btn = e.target.closest('.stepper button');
     if (btn) setPieceSetting(btn.closest('.piece').dataset.piece, btn.dataset.field, Number(btn.dataset.step));
   });
@@ -1608,6 +1708,7 @@
   $('tab-pieces').addEventListener('click', () => showTab('pieces'));
   $('tab-settings').addEventListener('click', () => showTab('settings'));
   $('tfStart').addEventListener('change', e => setTimeFrame(Number(e.target.value), state.frame.end));
+  $('splitInput').addEventListener('change', e => setSplit(e.target.value));
   $('tfEnd').addEventListener('change', e => setTimeFrame(state.frame.start, Number(e.target.value)));
 
   $('optBtn').addEventListener('click', runOptimizer);
@@ -1621,7 +1722,8 @@
   window.addEventListener('keydown', e => {
     if (e.key === 'Escape' && ptr) {
       cancelDrag();
-    } else if ((e.metaKey || e.ctrlKey) && !e.shiftKey && e.key.toLowerCase() === 'z') {
+    } else if ((e.metaKey || e.ctrlKey) && !e.shiftKey && e.key.toLowerCase() === 'z'
+      && !e.target.closest('input, textarea, select')) {
       e.preventDefault();
       undo();
     }
