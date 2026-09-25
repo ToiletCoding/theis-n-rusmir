@@ -32,6 +32,9 @@
       #ff7a9a, #ffb877, #f1f47a, #7dffb6, #74d0ff, #a393ff, #ff7ad8,
       #ff7a9a, #ffb877, #f1f47a, #7dffb6, #74d0ff, #a393ff, #ff7ad8, #ff7a9a);
     --slot-h: 22px;
+    --slots: 30;
+    --peak-from: 8;
+    --peak-len: 10;
     --gutter-w: 60px;
     --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Inter, Roboto, "Helvetica Neue", Arial, sans-serif;
   }
@@ -281,6 +284,51 @@
   }
   .tray.drop-remove.hot::after { border-color: var(--bad); color: var(--bad); }
 
+  .tabs {
+    display: flex;
+    gap: 2px;
+    padding: 3px;
+    margin-bottom: 4px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--panel);
+  }
+  .tab {
+    flex: 1;
+    height: 28px;
+    border: 0;
+    border-radius: 7px;
+    background: transparent;
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .tab:hover { color: var(--text); }
+  .tab[aria-selected="true"] { background: var(--panel-3); color: var(--text); }
+  .panel { display: flex; flex-direction: column; gap: 8px; }
+  .setting {
+    padding: 12px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    background: var(--panel);
+  }
+  .setting h3 { margin: 0 0 2px; font-size: 13px; font-weight: 600; }
+  .setting p { margin: 0 0 10px; color: var(--faint); font-size: 11.5px; line-height: 1.5; }
+  .range-row { display: flex; gap: 8px; }
+  .range-row label { flex: 1; display: flex; flex-direction: column; gap: 4px; color: var(--muted); font-size: 11px; }
+  .range-row select {
+    height: 30px;
+    padding: 0 8px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--panel-2);
+    color: var(--text);
+    font: inherit;
+    font-size: 12px;
+    font-variant-numeric: tabular-nums;
+    cursor: pointer;
+  }
   .hints { margin-top: 6px; padding: 0 4px; color: var(--faint); font-size: 11.5px; line-height: 1.5; }
   .hints p { margin: 0 0 8px; }
   .hints b { color: var(--muted); font-weight: 600; }
@@ -319,7 +367,7 @@
   .day-head .dt.over { color: var(--warn); }
 
   .grid { position: relative; margin-top: 8px; }
-  .gutter { position: relative; height: calc(var(--slot-h) * 30); }
+  .gutter { position: relative; height: calc(var(--slot-h) * var(--slots)); }
   .hour {
     position: absolute;
     right: 9px;
@@ -332,8 +380,8 @@
   .peak-mark {
     position: absolute;
     left: 4px;
-    top: calc(var(--slot-h) * 8 + 4px);
-    height: calc(var(--slot-h) * 10 - 8px);
+    top: calc(var(--slot-h) * var(--peak-from) + 4px);
+    height: calc(var(--slot-h) * var(--peak-len) - 8px);
     width: 2px;
     border-radius: 2px;
     background: rgba(185, 163, 255, 0.35);
@@ -354,7 +402,7 @@
   }
   .day {
     position: relative;
-    height: calc(var(--slot-h) * 30);
+    height: calc(var(--slot-h) * var(--slots));
     border-left: 1px solid var(--line);
     border-bottom: 1px solid var(--line-hour);
     background-image:
@@ -367,8 +415,8 @@
     position: absolute;
     left: 0;
     right: 0;
-    top: calc(var(--slot-h) * 8);
-    height: calc(var(--slot-h) * 10);
+    top: calc(var(--slot-h) * var(--peak-from));
+    height: calc(var(--slot-h) * var(--peak-len));
     background: var(--peak);
     pointer-events: none;
   }
@@ -610,16 +658,31 @@
 
   <aside class="tray" id="tray" aria-label="Pieces">
     <div class="tray-scroll">
-      <h2>Pieces</h2>
-      <div class="piece-list" id="pieces"></div>
-      <div class="hints">
-        <p>Drag a piece onto the board. <b>Click</b> a placed piece to pin it; pinned pieces stay put when you optimize. Length changes apply to the next piece you drag in.</p>
-        <p><b>Optimize</b> follows three rules:</p>
-        <ul>
-          <li>Study only between 12 and 17</li>
-          <li>Gym never two days in a row</li>
-          <li>No day over 6 h, with a break between pieces</li>
-        </ul>
+      <div class="tabs" role="tablist" aria-label="Sidebar">
+        <button class="tab" type="button" role="tab" id="tab-pieces" aria-selected="true" aria-controls="panel-pieces">Pieces</button>
+        <button class="tab" type="button" role="tab" id="tab-settings" aria-selected="false" aria-controls="panel-settings">Settings</button>
+      </div>
+      <div class="panel" id="panel-pieces" role="tabpanel" aria-labelledby="tab-pieces">
+        <div class="piece-list" id="pieces"></div>
+        <div class="hints">
+          <p>Drag a piece onto the board. <b>Click</b> a placed piece to pin it; pinned pieces stay put when you optimize. Length changes apply to the next piece you drag in.</p>
+          <p><b>Optimize</b> follows three rules:</p>
+          <ul>
+            <li>Study only between 12 and 17</li>
+            <li>Gym never two days in a row</li>
+            <li>No day over 6 h, with a break between pieces</li>
+          </ul>
+        </div>
+      </div>
+      <div class="panel" id="panel-settings" role="tabpanel" aria-labelledby="tab-settings" hidden>
+        <section class="setting">
+          <h3>Time frame</h3>
+          <p>The hours the board shows each day. Pieces keep their times when you change it.</p>
+          <div class="range-row">
+            <label>From <select id="tfStart"></select></label>
+            <label>To <select id="tfEnd"></select></label>
+          </div>
+        </section>
       </div>
     </div>
   </aside>
@@ -645,25 +708,38 @@
   // Board and rules
   // ---------------------------------------------------------------------------
   const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-  const START_HOUR = 8;
-  const END_HOUR = 23;
-  const SLOTS = (END_HOUR - START_HOUR) * 2; // 30-min slots per day
-  const slotAt = (h, m = 0) => (h - START_HOUR) * 2 + m / 30;
+  // The time frame (the hours the board shows) is a setting, so these are
+  // recomputed by applyTimeFrame().
+  const DEFAULT_FRAME = { start: 8, end: 23 };
+  const MIN_FRAME_HOURS = 4;
+  let START_HOUR, END_HOUR, SLOTS, PEAK;
+  const slotAt = h => (h - START_HOUR) * 2;
+  const PEAK_HOURS = { from: 12, to: 17 }; // hard pieces only go here
 
-  const PEAK = { from: slotAt(12), to: slotAt(17) }; // hard pieces only go here
+  function applyTimeFrame({ start, end }) {
+    START_HOUR = start;
+    END_HOUR = end;
+    SLOTS = (end - start) * 2; // 30-min slots per day
+    PEAK = { from: slotAt(PEAK_HOURS.from), to: slotAt(PEAK_HOURS.to) };
+    const from = Math.max(0, PEAK.from);
+    const root = document.documentElement.style;
+    root.setProperty('--slots', SLOTS);
+    root.setProperty('--peak-from', from);
+    root.setProperty('--peak-len', Math.max(0, Math.min(SLOTS, PEAK.to) - from));
+  }
   const DAY_CAP = 12; // 6 h, in slots
   // The rule asks for a 15-min break between pieces. The smallest gap on a
   // 30-min grid is one empty slot, so that's what the optimizer leaves.
   const BREAK = 1;
 
-  // `pref` is the start time the optimizer leans towards for that piece.
+  // `pref` is the start hour the optimizer leans towards for that piece.
   const PIECES = [
-    { id: 'work',     name: 'Work',     color: '#8fb4ff', dur: 8, target: 0, pref: slotAt(9) },
-    { id: 'gym',      name: 'Gym',      color: '#ff9e8e', dur: 2, target: 3, pref: slotAt(17, 30), spaced: true },
-    { id: 'study',    name: 'Study',    color: '#b9a3ff', dur: 3, target: 4, pref: slotAt(13), hard: true },
-    { id: 'chores',   name: 'Chores',   color: '#f2c77c', dur: 2, target: 0, pref: slotAt(10) },
-    { id: 'social',   name: 'Social',   color: '#f4a4cf', dur: 4, target: 0, pref: slotAt(19) },
-    { id: 'downtime', name: 'Downtime', color: '#86dcc4', dur: 2, target: 0, pref: slotAt(20, 30) },
+    { id: 'work',     name: 'Work',     color: '#8fb4ff', dur: 8, target: 0, pref: 9 },
+    { id: 'gym',      name: 'Gym',      color: '#ff9e8e', dur: 2, target: 3, pref: 17.5, spaced: true },
+    { id: 'study',    name: 'Study',    color: '#b9a3ff', dur: 3, target: 4, pref: 13, hard: true },
+    { id: 'chores',   name: 'Chores',   color: '#f2c77c', dur: 2, target: 0, pref: 10 },
+    { id: 'social',   name: 'Social',   color: '#f4a4cf', dur: 4, target: 0, pref: 19 },
+    { id: 'downtime', name: 'Downtime', color: '#86dcc4', dur: 2, target: 0, pref: 20.5 },
   ];
   const PIECE = Object.fromEntries(PIECES.map(p => [p.id, p]));
   const DUR_RANGE = [1, 16]; // 30 min to 8 h
@@ -681,6 +757,7 @@
     const m = START_HOUR * 60 + s * 30;
     return `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`;
   };
+  const clock = h => `${String(h).padStart(2, '0')}:00`;
   const hours = n => n === 1 ? '30 min' : `${n / 2} h`;
   const listCounts = counts => PIECES.filter(P => counts[P.id]).map(P => `${counts[P.id]} ${P.name}`).join(', ');
   const capitalize = s => s.charAt(0).toUpperCase() + s.slice(1);
@@ -692,6 +769,7 @@
 
   function freshState() {
     return {
+      frame: { ...DEFAULT_FRAME },
       pieces: Object.fromEntries(PIECES.map(p => [p.id, { dur: p.dur, target: p.target }])),
       blocks: [], // { id, p: piece id, d: day 0-6, s: start slot, n: length in slots, locked }
     };
@@ -699,12 +777,20 @@
 
   function loadState() {
     const state = freshState();
+    applyTimeFrame(state.frame);
     let raw = null;
     try { raw = localStorage.getItem(STORE_KEY); } catch { storageOk = false; }
     if (!raw) return state;
     let data;
     try { data = JSON.parse(raw); } catch { return state; }
     if (!data || typeof data !== 'object') return state;
+
+    if (data.frame) {
+      const start = clampInt(data.frame.start, 0, 24 - MIN_FRAME_HOURS, DEFAULT_FRAME.start);
+      const end = clampInt(data.frame.end, start + MIN_FRAME_HOURS, 24, Math.max(DEFAULT_FRAME.end, start + MIN_FRAME_HOURS));
+      state.frame = { start, end };
+      applyTimeFrame(state.frame);
+    }
 
     for (const P of PIECES) {
       const saved = data.pieces && data.pieces[P.id];
@@ -860,8 +946,8 @@
 
     function spots(it) {
       const P = PIECE[it.p];
-      const lo = P.hard ? PEAK.from : 0;
-      const hi = (P.hard ? PEAK.to : SLOTS) - it.n;
+      const lo = P.hard ? Math.max(0, PEAK.from) : 0;
+      const hi = (P.hard ? Math.min(SLOTS, PEAK.to) : SLOTS) - it.n;
       const found = [];
       for (let d = 0; d < 7; d++) {
         if (load[d] + it.n > DAY_CAP) continue;
@@ -873,7 +959,7 @@
           if (days[d].some(b => overlaps(s, it.n, b.s, b.n, BREAK))) continue;
           let score = -0.3 * (load[d] + it.n)      // lighter days first
             - 4 * same - nextDoor                   // spread repeats across the week
-            - 0.25 * Math.abs(s - P.pref);          // near the piece's usual time
+            - 0.25 * Math.abs(s - slotAt(P.pref)); // near the piece's usual time
           if (!P.hard && overlaps(s, it.n, PEAK.from, PEAK.to - PEAK.from)) score -= 1.5; // keep peak free
           if (wasHere.has(`${it.p}:${d}:${s}:${it.n}`)) score += 3;
           onDay.push({ d, s, score });
@@ -983,15 +1069,9 @@
 
     const gutter = document.createElement('div');
     gutter.className = 'gutter';
-    for (let h = START_HOUR; h <= END_HOUR; h++) {
-      const label = document.createElement('div');
-      label.className = 'hour';
-      label.style.setProperty('--i', h - START_HOUR);
-      label.textContent = `${String(h).padStart(2, '0')}:00`;
-      gutter.appendChild(label);
-    }
-    gutter.insertAdjacentHTML('beforeend', '<div class="peak-mark" title="Peak hours: Study goes here"><span>peak</span></div>');
+    gutter.id = 'gutter';
     grid.appendChild(gutter);
+    buildGutter();
 
     DAYS.forEach((name, d) => {
       const col = document.createElement('div');
@@ -1005,6 +1085,73 @@
 
     grid.insertAdjacentHTML('beforeend',
       '<div class="empty" id="empty"><p>Start with the fixed stuff: drag in your work shifts and classes, then click each one to pin it. Then hit <b>Optimize</b>.</p></div>');
+  }
+
+  function buildGutter() {
+    const gutter = $('gutter');
+    gutter.replaceChildren();
+    for (let h = START_HOUR; h <= END_HOUR; h++) {
+      const label = document.createElement('div');
+      label.className = 'hour';
+      label.style.setProperty('--i', h - START_HOUR);
+      label.textContent = clock(h);
+      gutter.appendChild(label);
+    }
+    if (PEAK.to > 0 && PEAK.from < SLOTS) {
+      gutter.insertAdjacentHTML('beforeend', '<div class="peak-mark" title="Peak hours: Study goes here"><span>peak</span></div>');
+    }
+    grid.querySelectorAll('.peak').forEach(band => { band.hidden = !(PEAK.to > 0 && PEAK.from < SLOTS); });
+  }
+
+  // ---------------------------------------------------------------------------
+  // Settings
+  // ---------------------------------------------------------------------------
+  function buildSettings() {
+    const option = h => `<option value="${h}">${clock(h)}</option>`;
+    $('tfStart').innerHTML = Array.from({ length: 24 - MIN_FRAME_HOURS + 1 }, (_, h) => option(h)).join('');
+    $('tfEnd').innerHTML = Array.from({ length: 24 - MIN_FRAME_HOURS + 1 }, (_, i) => option(i + MIN_FRAME_HOURS)).join('');
+    renderSettings();
+  }
+
+  function renderSettings() {
+    $('tfStart').value = state.frame.start;
+    $('tfEnd').value = state.frame.end;
+    for (const o of $('tfStart').options) o.disabled = Number(o.value) > state.frame.end - MIN_FRAME_HOURS;
+    for (const o of $('tfEnd').options) o.disabled = Number(o.value) < state.frame.start + MIN_FRAME_HOURS;
+  }
+
+  // Blocks store their start as a slot counted from the top of the board, so
+  // moving the start hour shifts every block to keep its real clock time.
+  function setTimeFrame(start, end) {
+    const shift = (START_HOUR - start) * 2;
+    const slots = (end - start) * 2;
+    const outside = state.blocks.filter(b => b.s + shift < 0 || b.s + shift + b.n > slots);
+    if (outside.length) {
+      const b = outside[0];
+      toast(`${PIECE[b.p].name} on ${DAYS[b.d]} (${time(b.s)}–${time(b.s + b.n)})` +
+        `${outside.length > 1 ? ` and ${outside.length - 1} more` : ''} would fall outside ` +
+        `${clock(start)}–${clock(end)}. Move or remove ${outside.length > 1 ? 'them' : 'it'} first.`);
+      renderSettings();
+      return;
+    }
+    state.blocks.forEach(b => { b.s += shift; });
+    state.frame = { start, end };
+    applyTimeFrame(state.frame);
+    undoStack.length = 0; // older snapshots use the old slot numbering
+    save();
+    buildGutter();
+    fitSlots();
+    render();
+    renderNow();
+    renderSettings();
+    toast(`The board now shows ${clock(start)}–${clock(end)}.`);
+  }
+
+  function showTab(name) {
+    for (const tab of ['pieces', 'settings']) {
+      $(`tab-${tab}`).setAttribute('aria-selected', String(tab === name));
+      $(`panel-${tab}`).hidden = tab !== name;
+    }
   }
 
   function buildTray() {
@@ -1456,6 +1603,11 @@
     if (btn) setPieceSetting(btn.closest('.piece').dataset.piece, btn.dataset.field, Number(btn.dataset.step));
   });
 
+  $('tab-pieces').addEventListener('click', () => showTab('pieces'));
+  $('tab-settings').addEventListener('click', () => showTab('settings'));
+  $('tfStart').addEventListener('change', e => setTimeFrame(Number(e.target.value), state.frame.end));
+  $('tfEnd').addEventListener('change', e => setTimeFrame(state.frame.start, Number(e.target.value)));
+
   $('optBtn').addEventListener('click', runOptimizer);
   $('clearBtn').addEventListener('click', clearUnpinned);
   $('undoBtn').addEventListener('click', undo);
@@ -1480,6 +1632,7 @@
   // ---------------------------------------------------------------------------
   buildBoard();
   buildTray();
+  buildSettings();
   if (!storageOk) showStorageWarning();
   fitSlots();
   render();
