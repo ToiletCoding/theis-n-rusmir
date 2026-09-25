@@ -67,23 +67,25 @@
   .topbar {
     grid-column: 1 / -1;
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
-    gap: 20px;
+    gap: 10px 20px;
     padding: 12px 20px;
     border-bottom: 1px solid var(--border);
   }
-  .brand { width: 210px; flex: none; }
+  .brand { flex: none; min-width: 150px; }
   .brand h1 { margin: 0; font-size: 15px; font-weight: 650; letter-spacing: -0.01em; }
   .brand small { display: block; margin-top: 1px; color: var(--faint); font-size: 11px; }
   .brand small.warn { color: var(--warn); }
 
-  .progress-wrap { flex: 1; display: flex; justify-content: center; min-width: 0; }
+  .progress-wrap { flex: 1 1 300px; display: flex; justify-content: center; min-width: 0; }
   .pg {
     position: relative;
     padding: 1.5px;
     border-radius: 999px;
     background: var(--border);
-    min-width: 280px;
+    min-width: min(280px, 100%);
+    max-width: 100%;
     transition: scale 0.3s;
   }
   .pg-glow {
@@ -139,7 +141,7 @@
   .pg.celebrate { scale: 1.05; }
   .pg.celebrate .pg-glow { opacity: 0.95; }
 
-  .actions { display: flex; gap: 8px; flex: none; }
+  .actions { display: flex; gap: 8px; flex: none; margin-left: auto; }
   .btn {
     height: 34px;
     padding: 0 14px;
