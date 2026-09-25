@@ -73,9 +73,60 @@
     padding: 12px 20px;
     border-bottom: 1px solid var(--border);
   }
-  .brand { flex: none; min-width: 150px; }
+  .brand { position: relative; flex: none; min-width: 150px; }
+  .week-menu {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    z-index: 70;
+    width: 270px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 12px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: #1b1f27;
+    box-shadow: 0 24px 50px -20px #000;
+  }
+  .week-menu p { margin: 0 0 4px; font-size: 12px; color: var(--muted); }
+  .week-menu p b { color: var(--text); }
+  .week-menu button {
+    height: 32px;
+    padding: 0 10px;
+    text-align: left;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--panel-2);
+    color: var(--text);
+    font-size: 12.5px;
+    cursor: pointer;
+  }
+  .week-menu button:hover { border-color: rgba(255, 255, 255, 0.18); }
+  .week-menu button[data-week="cancel"] { background: transparent; color: var(--muted); }
   .brand h1 { margin: 0; font-size: 15px; font-weight: 650; letter-spacing: -0.01em; }
   .brand small { display: block; margin-top: 1px; color: var(--faint); font-size: 11px; }
+  .week-row {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    margin-top: 2px;
+    font-size: 12px;
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+  }
+  .week-row.over #weekLabel { color: var(--warn); }
+  .link-btn {
+    padding: 0;
+    border: 0;
+    background: none;
+    color: #c9bdff;
+    font: inherit;
+    font-size: 11.5px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .link-btn:hover { text-decoration: underline; }
   .brand small.warn { color: var(--warn); }
 
   .progress-wrap { flex: 1 1 300px; display: flex; justify-content: center; min-width: 0; }
@@ -118,6 +169,14 @@
   .pg-item b { font-weight: 600; color: var(--text); }
   .pg-item.met { color: color-mix(in srgb, var(--c) 70%, white); }
   .pg-sep { margin: 0 8px; color: var(--faint); }
+  .pg-pre {
+    margin-right: 10px;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--faint);
+  }
   .pg-bar { display: flex; gap: 3px; height: 4px; }
   .pg-bar:empty { display: none; }
   .pg-seg {
@@ -321,8 +380,9 @@
     border-radius: 7px;
     background: transparent;
     color: var(--muted);
-    font-size: 12px;
+    font-size: 11.5px;
     font-weight: 600;
+    white-space: nowrap;
     cursor: pointer;
   }
   .tab:hover { color: var(--text); }
@@ -363,6 +423,68 @@
     font-size: 12px;
     line-height: 1.6;
   }
+  .limit-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .limit-row + .limit-row { margin-top: 6px; }
+  .limit-row .stepper { flex: 0 0 112px; }
+  .btn-row { display: flex; gap: 6px; margin-top: 8px; }
+  .btn.small { flex: 1; height: 28px; padding: 0 10px; font-size: 12px; }
+  #backupText { min-height: 64px; font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 10.5px; }
+  .recovery { color: var(--warn) !important; }
+  .btn.armed { color: var(--bad); border-color: var(--bad); }
+  .field-stack { display: flex; flex-direction: column; gap: 4px; }
+  .field-stack label { margin-top: 4px; font-size: 11px; color: var(--muted); }
+  .field-stack input {
+    height: 30px;
+    padding: 0 8px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--panel-2);
+    color: var(--text);
+    font: inherit;
+    font-size: 12px;
+    color-scheme: dark;
+  }
+  .counter-list { display: flex; flex-direction: column; gap: 8px; }
+  .counter-empty { margin: 0; padding: 0 4px; color: var(--faint); font-size: 11.5px; }
+  .counter {
+    padding: 12px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    background: var(--panel);
+  }
+  .counter.milestone {
+    border-color: transparent;
+    background: linear-gradient(var(--panel), var(--panel)) padding-box, var(--rainbow) border-box;
+    background-size: 100% 100%, 200% 100%;
+    animation: rgb-slide-2 8s linear infinite;
+  }
+  .c-top { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+  .c-name { font-size: 13px; font-weight: 600; overflow-wrap: anywhere; }
+  .c-badge {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    color: #c9bdff;
+  }
+  .c-count { margin-top: 2px; font-size: 12px; color: var(--muted); }
+  .c-count b {
+    margin-right: 4px;
+    font-size: 26px;
+    font-weight: 650;
+    letter-spacing: -0.02em;
+    color: var(--text);
+    font-variant-numeric: tabular-nums;
+  }
+  .c-since { font-size: 11px; color: var(--faint); }
   .hints { margin-top: 6px; padding: 0 4px; color: var(--faint); font-size: 11.5px; line-height: 1.5; }
   .hints p { margin: 0 0 8px; }
   .hints b { color: var(--muted); font-weight: 600; }
@@ -379,11 +501,23 @@
   .heads { position: sticky; top: 0; z-index: 6; background: var(--bg); }
   .day-head {
     display: flex;
-    align-items: baseline;
-    justify-content: space-between;
+    flex-direction: column;
     gap: 6px;
     padding: 12px 8px 8px;
   }
+  .dh-top { display: flex; align-items: baseline; justify-content: space-between; gap: 6px; }
+  .meter { display: flex; gap: 2px; height: 3px; }
+  .meter span {
+    position: relative;
+    flex: 1 1 0;
+    border-radius: 2px;
+    background: rgba(255, 255, 255, 0.07);
+    overflow: hidden;
+  }
+  .meter i { position: absolute; inset: 0 auto 0 0; border-radius: inherit; transition: width 0.3s; }
+  .m-work i { background: #8fb4ff; }
+  .m-other i { background: #c3c9d6; }
+  .meter span.over i { background: var(--warn); }
   .day-head .dn { font-weight: 600; color: var(--muted); }
   .day-head.today .dn { color: var(--text); }
   .day-head.today .dn::after {
@@ -452,6 +586,18 @@
     top: calc(var(--slot-h) * var(--peak-from));
     height: calc(var(--slot-h) * var(--peak-len));
     background: var(--peak);
+    pointer-events: none;
+  }
+  .past {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    height: calc(var(--slot-h) * var(--past, 0));
+    z-index: 1;
+    background:
+      repeating-linear-gradient(-45deg, rgba(255, 255, 255, 0.025) 0 4px, transparent 4px 8px),
+      rgba(0, 0, 0, 0.3);
     pointer-events: none;
   }
   .now {
@@ -539,6 +685,19 @@
   .b-name span { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
   .b-time { font-size: 11px; opacity: 0.72; white-space: nowrap; font-variant-numeric: tabular-nums; }
   .lock { display: none; width: 11px; height: 11px; flex: none; }
+  .b-warn {
+    display: inline-grid;
+    place-items: center;
+    width: 13px;
+    height: 13px;
+    flex: none;
+    border-radius: 50%;
+    background: var(--warn);
+    color: #1c1407;
+    font-size: 9px;
+    font-weight: 800;
+  }
+  .block.locked .b-warn { background: transparent; border: 1px solid var(--warn); color: var(--warn); }
   .block.locked .lock { display: block; }
   .block.tiny { display: flex; align-items: center; gap: 6px; padding-top: 0; padding-bottom: 0; }
   .block.tiny .b-time { font-size: 10px; }
@@ -654,6 +813,9 @@
     cursor: pointer;
   }
   .toast button:hover { background: rgba(163, 147, 255, 0.24); }
+  #toastMsg { line-height: 1.5; }
+  .toast .toast-x { background: none; color: var(--faint); padding: 4px 6px; font-size: 15px; line-height: 1; }
+  .toast .toast-x:hover { background: none; color: var(--text); }
 
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after {
@@ -669,6 +831,18 @@
   <header class="topbar">
     <div class="brand">
       <h1>Week Puzzle</h1>
+      <div class="week-row" id="weekRow">
+        <span id="weekLabel"></span>
+        <button class="link-btn" id="newWeekBtn" type="button" aria-haspopup="true" aria-expanded="false"
+          aria-controls="weekMenu">New week…</button>
+      </div>
+      <div class="week-menu" id="weekMenu" role="group" aria-label="Start a new week" hidden>
+        <p>Start <b id="weekMenuLabel"></b> with:</p>
+        <button type="button" data-week="empty">An empty board</button>
+        <button type="button" data-week="pinned">Pinned pieces carried forward</button>
+        <button type="button" data-week="copy">A copy of this week's layout</button>
+        <button type="button" data-week="cancel">Cancel</button>
+      </div>
       <small id="saveNote">Prototype · saved in this browser</small>
     </div>
     <div class="progress-wrap">
@@ -684,7 +858,7 @@
       <button class="btn" id="undoBtn" type="button" title="Undo (⌘Z / Ctrl+Z)">Undo</button>
       <button class="btn" id="clearBtn" type="button" title="Take every unpinned piece off the board">Clear</button>
       <button class="btn btn-primary" id="optBtn" type="button"
-        title="Pinned pieces stay put. Everything else gets rearranged, and missing pieces are added until each target is met.">
+        title="Keeps pinned pieces and unpinned pieces that follow the rules, moves the ones that don't, then adds pieces until each target is met.">
         <span class="spark" aria-hidden="true">✦</span>Optimize
       </button>
     </div>
@@ -694,19 +868,35 @@
     <div class="tray-scroll">
       <div class="tabs" role="tablist" aria-label="Sidebar">
         <button class="tab" type="button" role="tab" id="tab-pieces" aria-selected="true" aria-controls="panel-pieces">Pieces</button>
+        <button class="tab" type="button" role="tab" id="tab-days" aria-selected="false" aria-controls="panel-days">Days since</button>
         <button class="tab" type="button" role="tab" id="tab-settings" aria-selected="false" aria-controls="panel-settings">Settings</button>
       </div>
       <div class="panel" id="panel-pieces" role="tabpanel" aria-labelledby="tab-pieces">
         <div class="piece-list" id="pieces"></div>
         <div class="hints">
-          <p>Drag a piece onto the board. The day letters on a piece choose which days Optimize may use for it. <b>Click</b> a placed piece to pin it; pinned pieces stay put when you optimize. Length changes apply to the next piece you drag in.</p>
-          <p><b>Optimize</b> follows three rules:</p>
+          <p>Drag a piece onto the board. The day letters on a piece choose which days Optimize may use for it. <b>Click</b> a placed piece to pin it. Changing a length also resizes unpinned pieces of that kind where there's room.</p>
+          <p><b>Optimize</b> keeps pinned pieces and any unpinned piece that already follows the rules. It moves the ones that don't, then adds pieces until each target is met. A <b>!</b> marks a piece that breaks a rule. The rules:</p>
           <ul>
             <li>Study only between 12 and 17</li>
-            <li id="gymRule">Gym never two days in a row</li>
-            <li>No day over 6 h, with a break between pieces</li>
+            <li id="gymRule"></li>
+            <li id="capRule"></li>
+            <li>Nothing in time that has already passed</li>
           </ul>
         </div>
+      </div>
+      <div class="panel" id="panel-days" role="tabpanel" aria-labelledby="tab-days" hidden>
+        <form class="setting" id="counterForm" novalidate>
+          <h3>Days since</h3>
+          <p>Count the days since something started: a habit, a project, a streak. Counters are separate from the week board, targets and Optimize.</p>
+          <div class="field-stack">
+            <label for="counterName">Name</label>
+            <input id="counterName" type="text" maxlength="60" placeholder="Sobriety" autocomplete="off">
+            <label for="counterDate">Start date</label>
+            <input id="counterDate" type="date">
+          </div>
+          <div class="btn-row"><button class="btn small" type="submit">Add counter</button></div>
+        </form>
+        <div class="counter-list" id="counterList" aria-live="polite"></div>
       </div>
       <div class="panel" id="panel-settings" role="tabpanel" aria-labelledby="tab-settings" hidden>
         <section class="setting">
@@ -719,8 +909,41 @@
         </section>
         <section class="setting">
           <h3>Gym split</h3>
-          <p>One session per line, in order. Gym pieces get these names through the week, and Gym can then land on back-to-back days (still one session a day). Leave it empty for no split.</p>
+          <p>One session per line, in order. Names follow the order of Gym pieces through the week (Monday first), so moving or removing one can rename the ones after it. Gym pieces beyond the split are called Extra Gym. The Gym target always matches the number of sessions. With a split, Gym can land on back-to-back days (still one a day). Leave it empty for no split.</p>
           <textarea id="splitInput" spellcheck="false" aria-label="Gym split sessions, one per line"></textarea>
+        </section>
+        <section class="setting">
+          <h3>Daily limits</h3>
+          <p>How much Optimize may plan in one day. Work and everything else have separate limits, and the meter under each day shows both.</p>
+          <div class="limit-row">
+            <span>Work</span>
+            <div class="stepper">
+              <button type="button" data-cap="work" data-step="-2" aria-label="Lower the Work limit">−</button>
+              <output id="capWork" aria-live="polite"></output>
+              <button type="button" data-cap="work" data-step="2" aria-label="Raise the Work limit">+</button>
+            </div>
+          </div>
+          <div class="limit-row">
+            <span>Everything else</span>
+            <div class="stepper">
+              <button type="button" data-cap="other" data-step="-2" aria-label="Lower the limit for everything else">−</button>
+              <output id="capOther" aria-live="polite"></output>
+              <button type="button" data-cap="other" data-step="2" aria-label="Raise the limit for everything else">+</button>
+            </div>
+          </div>
+        </section>
+        <section class="setting">
+          <h3>Backup</h3>
+          <p class="recovery" id="recoveryNote" hidden></p>
+          <p>Your week lives only in this browser. Copy it as text to keep it safe or move it to another browser. To restore, paste it here and press Load.</p>
+          <textarea id="backupText" spellcheck="false" aria-label="Week backup text"></textarea>
+          <div class="btn-row">
+            <button class="btn small" id="copyWeek" type="button">Copy week</button>
+            <button class="btn small" id="loadWeek" type="button">Load pasted week</button>
+          </div>
+          <div class="btn-row">
+            <button class="btn small" id="resetPlanner" type="button">Reset planner…</button>
+          </div>
         </section>
       </div>
     </div>
@@ -737,6 +960,7 @@
 <div class="toast" id="toast" role="status" aria-live="polite">
   <span id="toastMsg"></span>
   <button id="toastUndo" type="button" hidden>Undo</button>
+  <button class="toast-x" id="toastClose" type="button" aria-label="Dismiss">×</button>
 </div>
 
 <script>
@@ -766,7 +990,11 @@
     root.setProperty('--peak-from', from);
     root.setProperty('--peak-len', Math.max(0, Math.min(SLOTS, PEAK.to) - from));
   }
-  const DAY_CAP = 12; // 6 h, in slots
+  // Daily limits (in slots), one for Work and one for everything else.
+  const DEFAULT_CAPS = { work: 16, other: 12 };
+  const CAP_RANGE = [2, 28]; // 1 h to 14 h
+  const kind = p => p === 'work' ? 'work' : 'other';
+  const KIND_NAME = { work: 'Work', other: 'Everything else' };
   // The rule asks for a 15-min break between pieces. The smallest gap on a
   // 30-min grid is one empty slot, so that's what the optimizer leaves.
   const BREAK = 1;
@@ -804,14 +1032,53 @@
   const capitalize = s => s.charAt(0).toUpperCase() + s.slice(1);
 
   // ---------------------------------------------------------------------------
+  // Dates
+  // ---------------------------------------------------------------------------
+  const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const pad2 = n => String(n).padStart(2, '0');
+  const addDays = (d, k) => new Date(d.getFullYear(), d.getMonth(), d.getDate() + k);
+  const mondayOf = date => addDays(date, -((date.getDay() + 6) % 7));
+  const isoDate = d => `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
+  function parseDate(str) {
+    const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(str));
+    if (!m) return null;
+    const d = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));
+    return d.getMonth() === Number(m[2]) - 1 ? d : null;
+  }
+  const dayDate = d => addDays(parseDate(state.weekStart), d);
+  const fullDate = iso => { const d = parseDate(iso); return `${MONTHS[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`; };
+  function weekLabel(start = parseDate(state.weekStart)) {
+    const a = start, b = addDays(start, 6);
+    return a.getMonth() === b.getMonth()
+      ? `${MONTHS[a.getMonth()]} ${a.getDate()}–${b.getDate()}`
+      : `${MONTHS[a.getMonth()]} ${a.getDate()} – ${MONTHS[b.getMonth()]} ${b.getDate()}`;
+  }
+
+  // Where "now" falls on the board: a day index (below 0 before this week,
+  // above 6 after it) and a fractional slot.
+  function nowOnBoard() {
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const day = Math.round((today - parseDate(state.weekStart)) / 864e5);
+    const slot = ((now.getHours() - START_HOUR) * 60 + now.getMinutes()) / 30;
+    return { day, slot };
+  }
+  const hasStarted = (d, s, now) => d < now.day || (d === now.day && s < now.slot);
+
+  // ---------------------------------------------------------------------------
   // State and saving
   // ---------------------------------------------------------------------------
   let storageOk = true;
+  let loadNotice = '';
+  let loadBackup = '';
 
   function freshState() {
     return {
+      weekStart: isoDate(mondayOf(new Date())),
       frame: { ...DEFAULT_FRAME },
+      caps: { ...DEFAULT_CAPS },
       split: DEFAULT_SPLIT.slice(),
+      counters: [], // Days since: { id, name, start: 'YYYY-MM-DD' }
       // `days`: which days the optimizer may put this piece on (Mon first).
       pieces: Object.fromEntries(PIECES.map(p => [p.id, {
         dur: p.dur,
@@ -822,40 +1089,120 @@
     };
   }
 
-  function loadState() {
-    const state = freshState();
-    applyTimeFrame(state.frame);
-    let raw = null;
-    try { raw = localStorage.getItem(STORE_KEY); } catch { storageOk = false; }
-    if (!raw) return state;
-    let data;
-    try { data = JSON.parse(raw); } catch { return state; }
-    if (!data || typeof data !== 'object') return state;
-
-    if (data.frame) {
-      const start = clampInt(data.frame.start, 0, 24 - MIN_FRAME_HOURS, DEFAULT_FRAME.start);
-      const end = clampInt(data.frame.end, start + MIN_FRAME_HOURS, 24, Math.max(DEFAULT_FRAME.end, start + MIN_FRAME_HOURS));
-      state.frame = { start, end };
-      applyTimeFrame(state.frame);
+  // Turns saved data into a valid state. Anything it has to fix or drop is
+  // described in `repairs`, so nothing disappears without a word.
+  function readState(data, repairs) {
+    const next = freshState();
+    applyTimeFrame(next.frame);
+    if (!data || typeof data !== 'object' || Array.isArray(data)) {
+      repairs.push('it wasn’t a saved week');
+      return next;
     }
 
-    if (Array.isArray(data.split)) state.split = cleanSplit(data.split);
+    if (data.frame && typeof data.frame === 'object') {
+      const start = clampInt(data.frame.start, 0, 24 - MIN_FRAME_HOURS, DEFAULT_FRAME.start);
+      const end = clampInt(data.frame.end, start + MIN_FRAME_HOURS, 24, Math.max(DEFAULT_FRAME.end, start + MIN_FRAME_HOURS));
+      if (start !== data.frame.start || end !== data.frame.end) repairs.push('the time frame was invalid and was reset');
+      next.frame = { start, end };
+      applyTimeFrame(next.frame);
+    }
+    if (data.weekStart !== undefined) {
+      const d = parseDate(data.weekStart);
+      if (d) next.weekStart = isoDate(mondayOf(d));
+      else repairs.push('the week date was unreadable, so the board is set to this week');
+    }
+    let settingsFixed = false;
+    const setting = (value, lo, hi, fallback) => {
+      if (value === undefined) return fallback;
+      const clean = clampInt(value, lo, hi, fallback);
+      if (clean !== value) settingsFixed = true;
+      return clean;
+    };
+    if (data.caps && typeof data.caps === 'object') {
+      for (const k of ['work', 'other']) next.caps[k] = setting(data.caps[k], ...CAP_RANGE, DEFAULT_CAPS[k]);
+    }
+    if (Array.isArray(data.split)) next.split = cleanSplit(data.split);
+    else if (data.split !== undefined) settingsFixed = true;
 
     for (const P of PIECES) {
       const saved = data.pieces && data.pieces[P.id];
-      if (!saved) continue;
-      if (Array.isArray(saved.days) && saved.days.length === 7) state.pieces[P.id].days = saved.days.map(Boolean);
-      state.pieces[P.id].dur = clampInt(saved.dur, ...DUR_RANGE, P.dur);
-      state.pieces[P.id].target = clampInt(saved.target, ...TARGET_RANGE, P.target);
+      if (!saved || typeof saved !== 'object') continue;
+      if (Array.isArray(saved.days) && saved.days.length === 7) next.pieces[P.id].days = saved.days.map(Boolean);
+      else if (saved.days !== undefined) settingsFixed = true;
+      next.pieces[P.id].dur = setting(saved.dur, ...DUR_RANGE, P.dur);
+      next.pieces[P.id].target = setting(saved.target, ...TARGET_RANGE, P.target);
     }
+    if (settingsFixed) repairs.push('some settings were out of range and were reset');
+
+    if (data.counters !== undefined) {
+      if (!Array.isArray(data.counters)) {
+        repairs.push('the Days since counters were unreadable');
+      } else {
+        const counterIds = new Set();
+        let bad = 0;
+        for (const c of data.counters) {
+          const name = c && typeof c.name === 'string' ? c.name.trim().slice(0, 60) : '';
+          const start = c && parseDate(c.start);
+          if (!name || !start) { bad++; continue; }
+          let id = typeof c.id === 'string' && /^[\w-]+$/.test(c.id) && !counterIds.has(c.id) ? c.id : null;
+          while (!id || counterIds.has(id)) id = 'c' + uid().slice(1);
+          counterIds.add(id);
+          next.counters.push({ id, name, start: isoDate(start) });
+        }
+        if (bad) repairs.push(`${bad} Days since counter${bad === 1 ? '' : 's'} couldn’t be restored`);
+      }
+    }
+    if (next.split.length) next.pieces.gym.target = next.split.length;
+
+    if (data.blocks !== undefined && !Array.isArray(data.blocks)) repairs.push('the list of pieces was unreadable');
+    const ids = new Set();
+    let dropped = 0, renamed = 0;
     for (const b of Array.isArray(data.blocks) ? data.blocks : []) {
-      if (!b || !PIECE[b.p] || ![b.d, b.s, b.n].every(Number.isInteger)) continue;
-      if (b.d < 0 || b.d > 6 || b.n < 1 || b.s < 0 || b.s + b.n > SLOTS) continue;
-      if (state.blocks.some(o => o.d === b.d && overlaps(o.s, o.n, b.s, b.n))) continue;
-      const id = typeof b.id === 'string' && /^[\w-]+$/.test(b.id) ? b.id : uid();
-      state.blocks.push({ id, p: b.p, d: b.d, s: b.s, n: b.n, locked: !!b.locked });
+      const valid = b && typeof b === 'object' && PIECE[b.p] && [b.d, b.s, b.n].every(Number.isInteger) &&
+        b.d >= 0 && b.d <= 6 && b.n >= 1 && b.s >= 0 && b.s + b.n <= SLOTS &&
+        !next.blocks.some(o => o.d === b.d && overlaps(o.s, o.n, b.s, b.n));
+      if (!valid) { dropped++; continue; }
+      let id = typeof b.id === 'string' && /^[\w-]+$/.test(b.id) ? b.id : null;
+      if (!id || ids.has(id)) {
+        if (id) renamed++;
+        do { id = uid(); } while (ids.has(id));
+      }
+      ids.add(id);
+      next.blocks.push({ id, p: b.p, d: b.d, s: b.s, n: b.n, locked: !!b.locked });
     }
-    return state;
+    if (dropped) repairs.push(`${dropped} piece${dropped === 1 ? '' : 's'} couldn’t be restored (broken, overlapping or outside the time frame)`);
+    if (renamed) repairs.push(`${renamed} piece${renamed === 1 ? '' : 's'} shared an id with another and got a new one`);
+    return next;
+  }
+
+  function loadState() {
+    const fresh = freshState();
+    applyTimeFrame(fresh.frame);
+    let raw = null;
+    try { raw = localStorage.getItem(STORE_KEY); } catch { storageOk = false; }
+    if (!raw) return fresh;
+    let data;
+    try {
+      data = JSON.parse(raw);
+    } catch {
+      keepBackup(raw);
+      loadNotice = 'Your saved week couldn’t be read, so this is a fresh board. The original text is in Settings → Backup.';
+      return fresh;
+    }
+    const repairs = [];
+    const loaded = readState(data, repairs);
+    if (repairs.length) {
+      keepBackup(raw);
+      loadNotice = `Your saved week needed repairs: ${repairs.join('; ')}. The original is in Settings → Backup.`;
+    }
+    return loaded;
+  }
+
+  // Keeps the original text of a save that had to be repaired, both in this
+  // browser's storage and in the Backup box, before anything overwrites it.
+  function keepBackup(raw) {
+    loadBackup = raw;
+    try { localStorage.setItem(`${STORE_KEY}:backup:${new Date().toISOString()}`, raw); } catch { /* storage full or blocked */ }
   }
 
   function cleanSplit(list) {
@@ -863,13 +1210,13 @@
   }
 
   // With a split, the Nth Gym piece of the week (Mon first, earliest first)
-  // gets the Nth session name, wrapping around if there are more pieces.
+  // gets the Nth session name. Pieces beyond the split are Extra Gym.
   function sessionNames() {
     const names = {};
     if (!state.split.length) return names;
     state.blocks.filter(b => b.p === 'gym')
       .sort((a, b) => a.d - b.d || a.s - b.s)
-      .forEach((b, i) => { names[b.id] = state.split[i % state.split.length]; });
+      .forEach((b, i) => { names[b.id] = i < state.split.length ? state.split[i] : 'Extra Gym'; });
     return names;
   }
 
@@ -892,16 +1239,26 @@
   const state = loadState();
   const undoStack = [];
 
+  // Undo keeps whole-planner snapshots (board, settings, week, counters) for
+  // this session. Take one before every change the user makes.
   function snapshot() {
-    undoStack.push(JSON.stringify(state.blocks));
+    undoStack.push(JSON.stringify(state));
     if (undoStack.length > 60) undoStack.shift();
+  }
+
+  function replaceState(next) {
+    Object.keys(state).forEach(k => delete state[k]);
+    Object.assign(state, next);
+    applyTimeFrame(state.frame);
   }
 
   function undo() {
     const prev = undoStack.pop();
     if (!prev) return;
-    state.blocks = JSON.parse(prev);
-    commit();
+    replaceState(JSON.parse(prev));
+    editingCounter = null;
+    save();
+    refreshAll();
     toast('Undone.');
   }
 
@@ -921,6 +1278,42 @@
     const counts = Object.fromEntries(PIECES.map(p => [p.id, 0]));
     state.blocks.forEach(b => counts[b.p]++);
     return counts;
+  }
+
+  function dayLoads(blocks) {
+    const load = { work: DAYS.map(() => 0), other: DAYS.map(() => 0) };
+    blocks.forEach(b => { load[kind(b.p)][b.d] += b.n; });
+    return load;
+  }
+
+  // ---------------------------------------------------------------------------
+  // Rules: the same checks Optimize uses, applied to the board as it is
+  // ---------------------------------------------------------------------------
+  function ruleIssues(blocks) {
+    const issues = {};
+    const add = (b, msg) => (issues[b.id] = issues[b.id] || []).push(msg);
+    const load = dayLoads(blocks);
+    for (const b of blocks) {
+      const P = PIECE[b.p];
+      const k = kind(b.p);
+      if (!state.pieces[b.p].days[b.d]) add(b, `${DAYS[b.d]} is switched off for ${P.name}`);
+      if (P.hard && (b.s < PEAK.from || b.s + b.n > PEAK.to)) {
+        add(b, `${P.name} is outside ${clock(PEAK_HOURS.from)}–${clock(PEAK_HOURS.to)}`);
+      }
+      if (load[k][b.d] > state.caps[k]) {
+        add(b, `${KIND_NAME[k]} on ${DAYS[b.d]} is ${hours(load[k][b.d])}, over the ${hours(state.caps[k])} limit`);
+      }
+      const neighbour = blocks.find(o => o !== b && o.d === b.d && overlaps(b.s, b.n, o.s, o.n, BREAK));
+      if (neighbour) add(b, `No break next to ${PIECE[neighbour.p].name}`);
+      if (P.spaced) {
+        const others = blocks.filter(o => o !== b && o.p === b.p);
+        if (others.some(o => o.d === b.d)) add(b, `Two ${P.name} sessions on ${DAYS[b.d]}`);
+        else if (!state.split.length && others.some(o => Math.abs(o.d - b.d) === 1)) {
+          add(b, `${P.name} the day before or after another ${P.name}`);
+        }
+      }
+    }
+    return issues;
   }
 
   // ---------------------------------------------------------------------------
@@ -970,147 +1363,353 @@
   function setPieceSetting(p, field, step) {
     const range = field === 'dur' ? DUR_RANGE : TARGET_RANGE;
     const cfg = state.pieces[p];
-    cfg[field] = Math.min(range[1], Math.max(range[0], cfg[field] + step));
+    const value = Math.min(range[1], Math.max(range[0], cfg[field] + step));
+    if (value === cfg[field]) return;
+    snapshot();
+    cfg[field] = value;
+    if (field === 'target') {
+      save();
+      renderTray();
+      renderProgress();
+      return;
+    }
+
+    // A new length also applies to unpinned pieces of this kind that haven't
+    // started yet, wherever they have room. Pinned ones keep their length.
+    const now = nowOnBoard();
+    const affected = state.blocks.filter(b => b.p === p && !b.locked && b.n !== value && !hasStarted(b.d, b.s, now));
+    if (!affected.length) {
+      save();
+      render();
+      return;
+    }
+    const resized = affected.filter(b => fits(b.d, b.s, value, b.id));
+    resized.forEach(b => { b.n = value; });
+    commit();
+    const name = PIECE[p].name;
+    const kept = affected.length - resized.length;
+    let msg = resized.length ? `${resized.length} unpinned ${name} resized to ${hours(value)}` : `No unpinned ${name} had room to become ${hours(value)}`;
+    if (resized.length && kept) msg += `; ${kept} had no room and kept ${kept === 1 ? 'its' : 'their'} length`;
+    if (state.blocks.some(b => b.p === p && b.locked)) msg += '. Pinned ones keep their length';
+    toast(`${msg}.`, { undo: true });
+  }
+
+  function setCap(k, step) {
+    const value = Math.min(CAP_RANGE[1], Math.max(CAP_RANGE[0], state.caps[k] + step));
+    if (value === state.caps[k]) return;
+    snapshot();
+    state.caps[k] = value;
     save();
-    renderTray();
-    renderProgress();
+    render();
+    renderSettings();
+  }
+
+  // The week a new week starts on: the one after the board's week, or this
+  // week if the board's week is already over.
+  function nextWeekStart() {
+    return nowOnBoard().day > 6 ? mondayOf(new Date()) : addDays(parseDate(state.weekStart), 7);
+  }
+
+  function startNewWeek(mode) {
+    const next = nextWeekStart();
+    snapshot();
+    state.weekStart = isoDate(next);
+    if (mode === 'empty') state.blocks = [];
+    else if (mode === 'pinned') state.blocks = state.blocks.filter(b => b.locked);
+    commit();
+    const n = state.blocks.length;
+    const what = mode === 'empty' ? 'an empty board'
+      : mode === 'pinned' ? `${n} pinned piece${n === 1 ? '' : 's'} carried forward`
+      : `a copy of last week's ${n} piece${n === 1 ? '' : 's'}`;
+    toast(`Now planning ${weekLabel()}, starting with ${what}.`, { undo: true, ms: 7000 });
+  }
+
+  function openWeekMenu() {
+    $('weekMenuLabel').textContent = weekLabel(nextWeekStart());
+    $('weekMenu').hidden = false;
+    $('newWeekBtn').setAttribute('aria-expanded', 'true');
+    $('weekMenu').querySelector('button').focus();
+  }
+
+  function closeWeekMenu(refocus) {
+    if ($('weekMenu').hidden) return;
+    $('weekMenu').hidden = true;
+    $('newWeekBtn').setAttribute('aria-expanded', 'false');
+    if (refocus) $('newWeekBtn').focus();
   }
 
   // ---------------------------------------------------------------------------
   // Optimizer
   // ---------------------------------------------------------------------------
-  // Pinned pieces never move. Every unpinned piece gets a fresh spot, and new
-  // pieces are added until each target is met. A small depth-first search tries
-  // the best-scoring spots first and backtracks when a later piece has nowhere
-  // to go. If everything can't fit, it keeps the arrangement that placed most.
+  // 1. Pinned pieces never move.
+  // 2. Unpinned pieces that follow the rules (or have already started) stay.
+  // 3. Unpinned pieces that break a rule get a new spot. If none exists they
+  //    stay where they are, marked. Optimize never deletes anything.
+  // 4. New pieces are added until each target is met.
+  // Placing uses a depth-first search that tries the best-scoring spots first
+  // and backtracks when a later piece has nowhere to go. A wider second pass
+  // runs if the first can't place everything.
   function planWeek() {
-    const pinned = state.blocks.filter(b => b.locked);
-    const loose = state.blocks.filter(b => !b.locked);
-
-    const todo = [];
-    for (const P of PIECES) {
-      const mine = loose.filter(b => b.p === P.id);
-      mine.forEach(b => todo.push({ p: P.id, n: b.n }));
-      const pinnedCount = pinned.filter(b => b.p === P.id).length;
-      const missing = state.pieces[P.id].target - pinnedCount - mine.length;
-      for (let i = 0; i < missing; i++) todo.push({ p: P.id, n: state.pieces[P.id].dur });
-    }
-    // Most constrained first: peak-only pieces, then spaced-out ones, then long ones.
-    const rank = it => PIECE[it.p].hard ? 0 : PIECE[it.p].spaced ? 1 : 2;
-    todo.sort((a, b) => rank(a) - rank(b) || b.n - a.n);
-
+    const now = nowOnBoard();
+    // The board as the planner sees it. Every entry has an id; entries of
+    // pieces that have moved away are marked `gone` instead of removed.
     const days = DAYS.map(() => []);
-    const load = DAYS.map(() => 0);
-    const put = (d, s, n, p) => { days[d].push({ s, n, p }); load[d] += n; };
-    const unput = d => { load[d] -= days[d].pop().n; };
-    const count = (p, d) => d < 0 || d > 6 ? 0 : days[d].filter(b => b.p === p).length;
-    pinned.forEach(b => put(b.d, b.s, b.n, b.p));
-    // Spots unpinned pieces already sit in get a bonus, so re-running the
-    // optimizer keeps your manual fixes as long as they follow the rules.
-    const wasHere = new Set(loose.map(b => `${b.p}:${b.d}:${b.s}:${b.n}`));
+    const load = { work: DAYS.map(() => 0), other: DAYS.map(() => 0) };
+    const put = (d, s, n, p, id) => {
+      const e = { d, s, n, p, id, gone: false };
+      days[d].push(e);
+      load[kind(p)][d] += n;
+      return e;
+    };
+    const unput = d => { const e = days[d].pop(); load[kind(e.p)][d] -= e.n; };
+    const hide = e => { e.gone = true; load[kind(e.p)][e.d] -= e.n; };
+    const unhide = e => { e.gone = false; load[kind(e.p)][e.d] += e.n; };
+    const live = d => days[d].filter(e => !e.gone);
+    const count = (p, d) => d < 0 || d > 6 ? 0 : live(d).filter(e => e.p === p).length;
+    const hoursRange = P => P.hard
+      ? { lo: Math.max(0, PEAK.from), hi: Math.min(SLOTS, PEAK.to) }
+      : { lo: 0, hi: SLOTS };
 
-    function spots(it) {
+    // Why piece p (n slots long) can't go on day d at all, or null if it can.
+    function dayBlocked(p, n, d) {
+      const P = PIECE[p];
+      if (!state.pieces[p].days[d]) return 'off';
+      if (d < now.day) return 'past';
+      if (load[kind(p)][d] + n > state.caps[kind(p)]) return 'cap';
+      if (P.spaced && count(p, d)) return 'twice';
+      if (P.spaced && !state.split.length && (count(p, d - 1) || count(p, d + 1))) return 'next';
+      return null;
+    }
+
+    function slotFree(it, d, s) {
+      if (d === now.day && s < now.slot) return false;
+      return !live(d).some(e => e.id !== it.id && overlaps(s, it.n, e.s, e.n, BREAK));
+    }
+
+    function spots(it, perDay, total) {
       const P = PIECE[it.p];
-      const lo = P.hard ? Math.max(0, PEAK.from) : 0;
-      const hi = (P.hard ? Math.min(SLOTS, PEAK.to) : SLOTS) - it.n;
+      const { lo, hi } = hoursRange(P);
       const found = [];
-      const allowed = state.pieces[it.p].days;
-      // Gym is one session a day. Without a split it also skips a day in between.
-      const backToBackOk = state.split.length > 0;
       for (let d = 0; d < 7; d++) {
-        if (!allowed[d] || load[d] + it.n > DAY_CAP) continue;
+        if (dayBlocked(it.p, it.n, d)) continue;
         const same = count(it.p, d);
         const nextDoor = count(it.p, d - 1) + count(it.p, d + 1);
-        if (P.spaced && (same || (nextDoor && !backToBackOk))) continue;
+        const dayLoad = load.work[d] + load.other[d];
         const onDay = [];
-        for (let s = lo; s <= hi; s++) {
-          if (days[d].some(b => overlaps(s, it.n, b.s, b.n, BREAK))) continue;
-          let score = -0.3 * (load[d] + it.n)      // lighter days first
-            - 4 * same - nextDoor                   // spread repeats across the week
-            - 0.25 * Math.abs(s - slotAt(P.pref)); // near the piece's usual time
+        for (let s = lo; s <= hi - it.n; s++) {
+          if (!slotFree(it, d, s)) continue;
+          let score = -0.3 * (dayLoad + it.n)        // lighter days first
+            - 4 * same - nextDoor                     // spread repeats across the week
+            - 0.25 * Math.abs(s - slotAt(P.pref));   // near the piece's usual time
           if (!P.hard && overlaps(s, it.n, PEAK.from, PEAK.to - PEAK.from)) score -= 1.5; // keep peak free
-          if (wasHere.has(`${it.p}:${d}:${s}:${it.n}`)) score += 3;
+          if (it.orig) score -= (d !== it.orig.d ? 2 : 0) + 0.1 * Math.abs(s - it.orig.s); // move pieces as little as possible
           onDay.push({ d, s, score });
         }
         onDay.sort((a, b) => b.score - a.score);
-        found.push(...onDay.slice(0, 2));
+        found.push(...onDay.slice(0, perDay));
       }
-      return found.sort((a, b) => b.score - a.score).slice(0, 6);
+      return found.sort((a, b) => b.score - a.score).slice(0, total);
     }
 
-    const pick = new Array(todo.length).fill(null);
-    let best = { placed: -1, pick: [] };
-    let budget = 5000;
-    (function search(i, placed) {
-      if (--budget < 0) return true;
-      if (placed + todo.length - i <= best.placed) return false;
-      if (i === todo.length) {
-        best = { placed, pick: pick.slice() };
-        return placed === todo.length;
+    // Places as many items as it can and leaves them on the board. An item
+    // with an `entry` is a piece already on the board: while the search
+    // considers moving it, its old spot is set aside, and if it can't move it
+    // keeps that spot (and its hours) for everything placed after it.
+    function place(items) {
+      const rank = it => PIECE[it.p].hard ? 0 : PIECE[it.p].spaced ? 1 : 2;
+      const order = items.map((_, i) => i)
+        .sort((a, b) => rank(items[a]) - rank(items[b]) || items[b].n - items[a].n);
+      let best = null;
+      let gaveUp = false;
+      for (const [perDay, total, limit] of [[2, 6, 5000], [4, 14, 20000]]) {
+        const pick = new Array(items.length).fill(null);
+        let found = { placed: -1, pick: [] };
+        let budget = limit;
+        let ranOut = false;
+        (function search(k, placed) {
+          if (--budget < 0) { ranOut = true; return true; }
+          if (placed + order.length - k <= found.placed) return false;
+          if (k === order.length) {
+            found = { placed, pick: pick.slice() };
+            return placed === order.length;
+          }
+          const i = order[k];
+          const it = items[i];
+          if (it.entry) hide(it.entry);
+          const options = spots(it, perDay, total);
+          for (const spot of options) {
+            put(spot.d, spot.s, it.n, it.p, it.id);
+            pick[i] = spot;
+            const done = search(k + 1, placed + 1);
+            unput(spot.d);
+            if (done) { if (it.entry) unhide(it.entry); return true; }
+          }
+          if (it.entry) unhide(it.entry);
+          pick[i] = null;
+          return search(k + 1, placed);
+        })(0, 0);
+        if (!best || found.placed > best.placed) best = found;
+        gaveUp = ranOut;
+        if (best.placed === items.length) break;
       }
-      const it = todo[i];
-      for (const spot of spots(it)) {
-        put(spot.d, spot.s, it.n, it.p);
-        pick[i] = spot;
-        const done = search(i + 1, placed + 1);
-        unput(spot.d);
-        if (done) return true;
-      }
-      pick[i] = null;
-      return search(i + 1, placed);
-    })(0, 0);
-
-    // Hand the old ids back out so pieces that didn't move stay the same piece.
-    const items = todo.map((it, i) => ({ ...it, spot: best.pick[i], id: null }));
-    const pool = loose.slice();
-    const takeFromPool = match => {
-      const j = pool.findIndex(match);
-      return j < 0 ? null : pool.splice(j, 1)[0].id;
-    };
-    for (const it of items) {
-      if (!it.spot) continue;
-      it.id = takeFromPool(b => b.p === it.p && b.n === it.n && b.d === it.spot.d && b.s === it.spot.s);
-      it.stayed = !!it.id;
+      best.pick.forEach((spot, i) => {
+        if (!spot) return;
+        if (items[i].entry) hide(items[i].entry);
+        put(spot.d, spot.s, items[i].n, items[i].p, items[i].id);
+      });
+      return { pick: best.pick, gaveUp: gaveUp && best.placed < items.length };
     }
-    const added = {}, short = {}, landed = [];
+
+    // Steps 1 and 2.
+    const pinned = state.blocks.filter(b => b.locked);
+    pinned.forEach(b => put(b.d, b.s, b.n, b.p, b.id));
+    const stay = [], toMove = [];
+    for (const b of state.blocks.filter(o => !o.locked).sort((a, c) => a.d - c.d || a.s - c.s)) {
+      const { lo, hi } = hoursRange(PIECE[b.p]);
+      const ok = hasStarted(b.d, b.s, now) || (!dayBlocked(b.p, b.n, b.d) && b.s >= lo && b.s + b.n <= hi &&
+        !live(b.d).some(e => overlaps(b.s, b.n, e.s, e.n, BREAK)));
+      if (ok) stay.push(b);
+      else toMove.push(b);
+      put(b.d, b.s, b.n, b.p, b.id);
+    }
+
+    // Step 3.
+    const entryOf = id => days.flat().find(e => e.id === id);
+    const moves = place(toMove.map(b => ({ id: b.id, p: b.p, n: b.n, orig: b, entry: entryOf(b.id) })));
+    const stuck = toMove.filter((_, i) => !moves.pick[i]);
+
+    // Step 4.
+    const counts = countByPiece();
+    const extra = [];
+    for (const P of PIECES) {
+      for (let i = counts[P.id]; i < state.pieces[P.id].target; i++) {
+        extra.push({ id: `new${extra.length}`, p: P.id, n: state.pieces[P.id].dur });
+      }
+    }
+    const adds = place(extra);
+
+    const blocks = [...pinned, ...stay, ...stuck].map(b => ({ ...b }));
+    const landed = [], added = {}, short = {};
     let moved = 0;
-    for (const it of items) {
-      if (!it.spot) { short[it.p] = (short[it.p] || 0) + 1; continue; }
-      if (it.stayed) continue;
-      it.id = takeFromPool(b => b.p === it.p && b.n === it.n);
-      if (it.id) moved++;
-      else { it.id = uid(); added[it.p] = (added[it.p] || 0) + 1; }
-      landed.push(it.id);
+    toMove.forEach((b, i) => {
+      const spot = moves.pick[i];
+      if (!spot) return;
+      blocks.push({ ...b, d: spot.d, s: spot.s });
+      if (spot.d !== b.d || spot.s !== b.s) { moved++; landed.push(b.id); }
+    });
+    extra.forEach((it, i) => {
+      const spot = adds.pick[i];
+      if (!spot) { short[it.p] = (short[it.p] || 0) + 1; return; }
+      const id = uid();
+      blocks.push({ id, p: it.p, d: spot.d, s: spot.s, n: it.n, locked: false });
+      landed.push(id);
+      added[it.p] = (added[it.p] || 0) + 1;
+    });
+
+    // For each piece that didn't fit, say what blocked each day and what would help.
+    const whyShort = {};
+    for (const p of Object.keys(short)) {
+      const P = PIECE[p];
+      const n = state.pieces[p].dur;
+      const { lo, hi } = hoursRange(P);
+      if (hi - lo < n) {
+        whyShort[p] = P.hard
+          ? { text: `it's ${hours(n)}, but only ${hours(Math.max(0, hi - lo))} of ${clock(PEAK_HOURS.from)}–${clock(PEAK_HOURS.to)} is on the board`,
+              fixes: [`shorten ${P.name} or widen the time frame in Settings`], proven: true }
+          : { text: 'it’s longer than the board’s day', fixes: ['shorten it or widen the time frame in Settings'], proven: true };
+        continue;
+      }
+      const text = {
+        off: 'switched off',
+        past: 'already over',
+        cap: `at the ${hours(state.caps[kind(p)])} ${kind(p) === 'work' ? 'Work' : 'daily'} limit`,
+        twice: `${P.name} already planned`,
+        next: `next to another ${P.name} day`,
+        full: `no free ${hours(n)} gap${P.hard ? ` in ${clock(PEAK_HOURS.from)}–${clock(PEAK_HOURS.to)}` : ''} with breaks around what's there`,
+        room: 'room, but no arrangement that fits everything else too',
+      };
+      const fixFor = {
+        off: `switch on more days for ${P.name}`,
+        cap: 'raise the daily limit in Settings',
+        next: 'add a Gym split in Settings (it allows back-to-back days)',
+        full: 'move, shorten or unpin something on those days',
+        room: 'move pieces by hand to make room',
+      };
+      const groups = {};
+      for (let d = 0; d < 7; d++) {
+        let why = dayBlocked(p, n, d);
+        if (!why) {
+          let free = false;
+          for (let s = lo; s <= hi - n && !free; s++) free = slotFree({ id: null, p, n }, d, s);
+          why = free ? 'room' : 'full';
+        }
+        (groups[why] = groups[why] || []).push(d);
+      }
+      const fixes = Object.keys(groups).map(why => fixFor[why]).filter(Boolean);
+      if (groups.past && groups.past.length === 7) fixes.push('start a new week');
+      // Every day blocked by a hard rule means there really is no spot. Gaps
+      // and "room" are judgements of the search, so they stay tentative.
+      const proven = !groups.full && !groups.room;
+      whyShort[p] = { text: Object.entries(groups).map(([why, ds]) => `${dayList(ds)}: ${text[why]}`).join('; '), fixes, proven };
     }
-    const blocks = pinned.map(b => ({ ...b }))
-      .concat(items.filter(it => it.spot).map(it => ({ id: it.id, p: it.p, d: it.spot.d, s: it.spot.s, n: it.n, locked: false })));
-    return { blocks, landed, added, moved, short, removed: pool.length };
+
+    return { blocks, landed, added, moved, kept: stay.length, short, stuck, whyShort, gaveUp: moves.gaveUp || adds.gaveUp };
+  }
+
+  // [0, 1, 2, 4] → "Mon–Wed, Fri"
+  function dayList(ds) {
+    const runs = [];
+    for (const d of ds) {
+      const last = runs[runs.length - 1];
+      if (last && d === last[1] + 1) last[1] = d;
+      else runs.push([d, d]);
+    }
+    return runs.map(([a, b]) => a === b ? DAYS[a] : b === a + 1 ? `${DAYS[a]}, ${DAYS[b]}` : `${DAYS[a]}–${DAYS[b]}`).join(', ');
   }
 
   function runOptimizer() {
     const plan = planWeek();
-    const signature = blocks => blocks.map(b => `${b.id}:${b.d}:${b.s}:${b.n}:${b.locked}`).sort().join('|');
-    const shortText = listCounts(plan.short);
-    const advice = ' Unpin something or lower a target.';
+    const notes = [];
+    if (plan.stuck.length) {
+      const n = plan.stuck.length;
+      notes.push(`${n} unpinned piece${n === 1 ? ' breaks' : 's break'} a rule but had nowhere better to go, so ${n === 1 ? 'it stayed' : 'they stayed'} put (marked !).`);
+    }
+    for (const p of Object.keys(plan.short)) {
+      const why = plan.whyShort[p];
+      notes.push(`${why.proven ? 'No spot left for' : 'Couldn’t find a placement for'} ${plan.short[p]} ${PIECE[p].name}: ${why.text}.` +
+        (why.fixes.length ? ` To make room, ${why.fixes.join(', or ')}.` : ''));
+    }
+    if (plan.gaveUp && Object.values(plan.whyShort).some(w => !w.proven)) {
+      notes.push('The search stopped early, so moving things by hand might still make room.');
+    }
+    const issues = ruleIssues(plan.blocks);
+    const exceptions = plan.blocks.filter(b => b.locked && issues[b.id]).length;
+    if (exceptions) {
+      notes.push(`${exceptions} pinned piece${exceptions === 1 ? ' breaks' : 's break'} a rule, which is allowed (marked !).`);
+    }
+    for (const P of PIECES) {
+      // Pinned pieces keep their own length on purpose, so only unpinned ones count.
+      const off = plan.blocks.filter(b => b.p === P.id && !b.locked && b.n !== state.pieces[P.id].dur).length;
+      if (off) notes.push(`${off} unpinned ${P.name} piece${off === 1 ? ' isn’t' : 's aren’t'} the current ${P.name} length (${hours(state.pieces[P.id].dur)}).`);
+    }
+    const tail = notes.length ? ` ${notes.join(' ')}` : '';
+    const ms = notes.length ? 20000 : 6000;
 
-    if (signature(plan.blocks) === signature(state.blocks)) {
-      toast(shortText
-        ? `Nothing better to do: there's still no room for ${shortText}.${advice}`
-        : 'Nothing to change. This week already follows the rules.');
+    const addedText = listCounts(plan.added);
+    if (!addedText && !plan.moved) {
+      toast(notes.length
+        ? `Nothing changed.${tail}`
+        : 'Nothing to change. Every piece follows the rules and every target is planned.', { ms });
       return;
     }
     snapshot();
     state.blocks = plan.blocks;
     commit(plan.landed, true);
-
     const parts = [];
-    const addedText = listCounts(plan.added);
     if (addedText) parts.push(`added ${addedText}`);
-    if (plan.moved) parts.push(`moved ${plan.moved}`);
-    if (plan.removed) parts.push(`took ${plan.removed} off the board`);
-    let msg = capitalize(parts.join(' · ') || 'rearranged');
-    msg += shortText ? `. Couldn't fit ${shortText}.${advice}` : '.';
-    toast(msg, { undo: true, ms: 7000 });
+    if (plan.moved) parts.push(`moved ${plan.moved} that broke a rule`);
+    if (plan.kept) parts.push(`left ${plan.kept} of your unpinned pieces where they were`);
+    toast(`${capitalize(parts.join(' · '))}.${tail}`, { undo: true, ms });
   }
 
   // ---------------------------------------------------------------------------
@@ -1130,7 +1729,8 @@
     DAYS.forEach(name => {
       const head = document.createElement('div');
       head.className = 'day-head';
-      head.innerHTML = `<span class="dn">${name}</span><span class="dt"></span>`;
+      head.innerHTML = `<div class="dh-top"><span class="dn">${name}</span><span class="dt"></span></div>` +
+        '<div class="meter" aria-hidden="true"><span class="m-work"><i></i></span><span class="m-other"><i></i></span></div>';
       heads.appendChild(head);
       dayHeads.push(head);
     });
@@ -1179,11 +1779,17 @@
     $('tfStart').innerHTML = Array.from({ length: 24 - MIN_FRAME_HOURS + 1 }, (_, h) => option(h)).join('');
     $('tfEnd').innerHTML = Array.from({ length: 24 - MIN_FRAME_HOURS + 1 }, (_, i) => option(i + MIN_FRAME_HOURS)).join('');
     $('splitInput').value = state.split.join('\n');
+    if (loadBackup) $('backupText').value = loadBackup;
     renderSettings();
   }
 
   function setSplit(text) {
     const split = cleanSplit(text.split('\n'));
+    if (split.join('\n') === state.split.join('\n')) {
+      $('splitInput').value = split.join('\n');
+      return;
+    }
+    snapshot();
     state.split = split;
     if (split.length) state.pieces.gym.target = split.length;
     save();
@@ -1191,10 +1797,16 @@
     $('splitInput').value = split.join('\n');
     toast(split.length
       ? `Gym split saved: ${split.length} sessions, so the Gym target is now ${split.length}×.`
-      : 'Gym split cleared. Gym goes back to never two days in a row.');
+      : 'Gym split cleared. The Gym target is editable again, and Gym goes back to never two days in a row.', { undo: true });
   }
 
   function renderSettings() {
+    $('capWork').textContent = hours(state.caps.work);
+    $('capOther').textContent = hours(state.caps.other);
+    for (const btn of document.querySelectorAll('[data-cap]')) {
+      const v = state.caps[btn.dataset.cap] + Number(btn.dataset.step);
+      btn.disabled = v < CAP_RANGE[0] || v > CAP_RANGE[1];
+    }
     $('tfStart').value = state.frame.start;
     $('tfEnd').value = state.frame.end;
     for (const o of $('tfStart').options) o.disabled = Number(o.value) > state.frame.end - MIN_FRAME_HOURS;
@@ -1215,21 +1827,215 @@
       renderSettings();
       return;
     }
+    snapshot();
     state.blocks.forEach(b => { b.s += shift; });
     state.frame = { start, end };
     applyTimeFrame(state.frame);
-    undoStack.length = 0; // older snapshots use the old slot numbering
     save();
+    refreshAll();
+    toast(`The board now shows ${clock(start)}–${clock(end)}.`, { undo: true });
+  }
+
+  function copyWeek() {
+    const text = JSON.stringify({ app: 'week-puzzle', version: 1, ...state });
+    const box = $('backupText');
+    box.value = text;
+    const fallback = () => {
+      box.focus();
+      box.select();
+      toast('The week is selected in the box. Press ⌘C / Ctrl+C to copy it.');
+    };
+    try {
+      navigator.clipboard.writeText(text).then(() => toast('Week copied. Paste it somewhere safe, like a note.'), fallback);
+    } catch {
+      fallback();
+    }
+  }
+
+  function loadPastedWeek() {
+    const box = $('backupText');
+    const text = box.value.trim();
+    const notAWeek = 'That text isn’t a copied week. Copy one with “Copy week” first.';
+    if (!text) { toast('Paste a copied week into the box first.'); return; }
+    let data;
+    try { data = JSON.parse(text); } catch { toast(notAWeek); return; }
+    if (!data || typeof data !== 'object' || !Array.isArray(data.blocks)) { toast(notAWeek); return; }
+    const previous = JSON.stringify({ app: 'week-puzzle', version: 1, ...state });
+    const repairs = [];
+    const next = readState(data, repairs); // also applies the pasted time frame; replaceState re-applies
+    snapshot();
+    replaceState(next);
+    save();
+    refreshAll();
+    box.value = previous; // so the week that was replaced isn't lost
+    toast(`Loaded the week of ${weekLabel()}${repairs.length ? `, with repairs: ${repairs.join('; ')}` : ''}. ` +
+      'The week it replaced is now in the Backup box.', { undo: true, ms: 9000 });
+  }
+
+  let resetArmed = null;
+  function resetPlanner() {
+    const btn = $('resetPlanner');
+    if (!resetArmed) {
+      btn.textContent = 'Press again to reset';
+      btn.classList.add('armed');
+      resetArmed = setTimeout(() => {
+        resetArmed = null;
+        btn.textContent = 'Reset planner…';
+        btn.classList.remove('armed');
+      }, 4000);
+      return;
+    }
+    clearTimeout(resetArmed);
+    resetArmed = null;
+    btn.textContent = 'Reset planner…';
+    btn.classList.remove('armed');
+    $('backupText').value = JSON.stringify({ app: 'week-puzzle', version: 1, ...state });
+    snapshot();
+    replaceState(freshState());
+    save();
+    refreshAll();
+    toast('Planner reset. The old planner is in the Backup box, and Undo brings it back.', { undo: true, ms: 9000 });
+  }
+
+  // Redraws everything that depends on settings, e.g. after undo or loading.
+  function refreshAll() {
     buildGutter();
     fitSlots();
     render();
-    renderNow();
     renderSettings();
-    toast(`The board now shows ${clock(start)}–${clock(end)}.`);
+    $('splitInput').value = state.split.join('\n');
+    renderCounters();
+  }
+
+  // ---------------------------------------------------------------------------
+  // Days since
+  // ---------------------------------------------------------------------------
+  let editingCounter = null;
+  let counterDay = '';
+  const isLeap = y => (y % 4 === 0 && y % 100 !== 0) || y % 400 === 0;
+
+  // Whole calendar days from `iso` to today. Counting in UTC dates keeps it
+  // right across daylight-saving changes.
+  function daysSince(iso, today = new Date()) {
+    const a = parseDate(iso);
+    return Math.round((Date.UTC(today.getFullYear(), today.getMonth(), today.getDate()) -
+      Date.UTC(a.getFullYear(), a.getMonth(), a.getDate())) / 864e5);
+  }
+
+  function milestone(iso, days, today = new Date()) {
+    if (days <= 0) return '';
+    const a = parseDate(iso);
+    const years = today.getFullYear() - a.getFullYear();
+    const feb29 = a.getMonth() === 1 && a.getDate() === 29 && !isLeap(today.getFullYear());
+    const anniversary = years >= 1 && today.getMonth() === a.getMonth() &&
+      (today.getDate() === a.getDate() || (feb29 && today.getDate() === 28));
+    if (anniversary) return `${years} year${years === 1 ? '' : 's'}`;
+    return [7, 30, 90, 180, 365].includes(days) ? `${days} days` : '';
+  }
+
+  function counterView(c) {
+    const days = daysSince(c.start);
+    const badge = milestone(c.start, days);
+    const count = days >= 0
+      ? `<b>${days}</b>day${days === 1 ? '' : 's'}`
+      : days === -1 ? 'Starts tomorrow' : `Starts in ${-days} days`;
+    const said = days >= 0 ? `${days} day${days === 1 ? '' : 's'} since ${fullDate(c.start)}` : `starts ${fullDate(c.start)}`;
+    return `<article class="counter${badge ? ' milestone' : ''}" data-id="${c.id}" aria-label="${esc(c.name)}: ${said}${badge ? `, ${badge} milestone` : ''}">
+      <div class="c-top"><span class="c-name">${esc(c.name)}</span>${badge ? `<span class="c-badge">${badge}</span>` : ''}</div>
+      <div class="c-count">${count}</div>
+      <div class="c-since">${days >= 0 ? 'Since' : 'Starts'} ${fullDate(c.start)}</div>
+      <div class="btn-row">
+        <button class="btn small" type="button" data-act="edit" aria-label="Edit ${esc(c.name)}">Edit</button>
+        <button class="btn small" type="button" data-act="remove" aria-label="Remove ${esc(c.name)}">Remove</button>
+      </div>
+    </article>`;
+  }
+
+  function counterEditor(c) {
+    return `<article class="counter" data-id="${c.id}">
+      <div class="field-stack">
+        <label for="edit-name-${c.id}">Name</label>
+        <input id="edit-name-${c.id}" type="text" maxlength="60" value="${esc(c.name)}" data-field="name">
+        <label for="edit-date-${c.id}">Start date</label>
+        <input id="edit-date-${c.id}" type="date" value="${c.start}" data-field="start">
+      </div>
+      <div class="btn-row">
+        <button class="btn small" type="button" data-act="save">Save</button>
+        <button class="btn small" type="button" data-act="cancel">Cancel</button>
+      </div>
+    </article>`;
+  }
+
+  function renderCounters() {
+    counterDay = isoDate(new Date());
+    $('counterList').innerHTML = state.counters.length
+      ? state.counters.map(c => c.id === editingCounter ? counterEditor(c) : counterView(c)).join('')
+      : '<p class="counter-empty">No counters yet.</p>';
+  }
+
+  function addCounter(e) {
+    e.preventDefault();
+    const name = $('counterName').value.trim().slice(0, 60);
+    const start = parseDate($('counterDate').value);
+    if (!name || !start) {
+      toast(!name ? 'Give the counter a name.' : 'Pick a start date for the counter.');
+      (!name ? $('counterName') : $('counterDate')).focus();
+      return;
+    }
+    snapshot();
+    let id;
+    do { id = 'c' + uid().slice(1); } while (state.counters.some(c => c.id === id));
+    state.counters.push({ id, name, start: isoDate(start) });
+    save();
+    renderCounters();
+    $('counterForm').reset();
+    toast(`Added “${name}”.`, { undo: true });
+  }
+
+  function saveCounter(article) {
+    const c = state.counters.find(x => x.id === article.dataset.id);
+    const name = article.querySelector('[data-field="name"]').value.trim().slice(0, 60);
+    const start = parseDate(article.querySelector('[data-field="start"]').value);
+    if (!name || !start) {
+      toast(!name ? 'The counter needs a name.' : 'Pick a valid start date.');
+      return;
+    }
+    snapshot();
+    c.name = name;
+    c.start = isoDate(start);
+    editingCounter = null;
+    save();
+    renderCounters();
+    toast(`Saved “${name}”.`, { undo: true });
+  }
+
+  function onCounterClick(e) {
+    const btn = e.target.closest('[data-act]');
+    if (!btn) return;
+    const article = btn.closest('.counter');
+    const id = article.dataset.id;
+    const act = btn.dataset.act;
+    if (act === 'edit') {
+      editingCounter = id;
+      renderCounters();
+      $(`edit-name-${id}`).focus();
+    } else if (act === 'cancel') {
+      editingCounter = null;
+      renderCounters();
+    } else if (act === 'save') {
+      saveCounter(article);
+    } else if (act === 'remove') {
+      const c = state.counters.find(x => x.id === id);
+      snapshot();
+      state.counters = state.counters.filter(x => x.id !== id);
+      save();
+      renderCounters();
+      toast(`Removed “${c.name}”.`, { undo: true });
+    }
   }
 
   function showTab(name) {
-    for (const tab of ['pieces', 'settings']) {
+    for (const tab of ['pieces', 'days', 'settings']) {
       $(`tab-${tab}`).setAttribute('aria-selected', String(tab === name));
       $(`panel-${tab}`).hidden = tab !== name;
     }
@@ -1282,8 +2088,9 @@
   // ---------------------------------------------------------------------------
   const LOCK_ICON = '<svg class="lock" viewBox="0 0 16 16" aria-hidden="true"><path d="M5 7V5.2a3 3 0 0 1 6 0V7" fill="none" stroke="currentColor" stroke-width="1.7"/><rect x="3" y="7" width="10" height="7.5" rx="1.8" fill="currentColor"/></svg>';
 
-  function blockHTML(P, s, n, label) {
-    return `<div class="b-name">${LOCK_ICON}<span>${esc(label || P.name)}</span></div><div class="b-time">${time(s)}–${time(s + n)}</div>`;
+  function blockHTML(P, s, n, label, broken) {
+    return `<div class="b-name">${broken ? '<span class="b-warn" aria-hidden="true">!</span>' : ''}${LOCK_ICON}` +
+      `<span>${esc(label || P.name)}</span></div><div class="b-time">${time(s)}–${time(s + n)}</div>`;
   }
 
   function render(landed = [], stagger = false) {
@@ -1297,6 +2104,9 @@
     $('gymRule').textContent = state.split.length
       ? 'Gym at most once a day (split, so back-to-back is fine)'
       : 'Gym never two days in a row';
+    $('capRule').textContent = `Work up to ${hours(state.caps.work)} and everything else up to ` +
+      `${hours(state.caps.other)} a day, with a break between pieces`;
+    renderNow();
   }
 
   function renderBlocks(landed, stagger) {
@@ -1305,6 +2115,7 @@
     board.querySelectorAll('.day .block').forEach(node => node.remove());
 
     const sessions = sessionNames();
+    const issues = ruleIssues(state.blocks);
     const order = state.blocks.filter(b => landed.includes(b.id))
       .sort((a, b) => a.d - b.d || a.s - b.s).map(b => b.id);
 
@@ -1319,11 +2130,15 @@
       node.tabIndex = 0;
       node.setAttribute('role', 'button');
       node.setAttribute('aria-pressed', String(b.locked));
+      const broken = issues[b.id];
+      const problem = broken
+        ? `${b.locked ? 'Breaks a rule (allowed, since it’s pinned)' : 'Breaks a rule, so Optimize will try to move it'}: ${broken.join('; ')}.`
+        : '';
       node.setAttribute('aria-label',
         `${P.name}${sessions[b.id] ? ` (${sessions[b.id]})` : ''}, ${DAYS[b.d]} ${time(b.s)} to ${time(b.s + b.n)}${b.locked ? ', pinned' : ''}. ` +
-        `Enter to ${b.locked ? 'unpin' : 'pin'}, Delete to remove.`);
-      node.title = b.locked ? 'Pinned. Click to unpin.' : 'Drag to move. Click to pin.';
-      node.innerHTML = blockHTML(P, b.s, b.n, sessions[b.id]) +
+        `${problem ? `${problem} ` : ''}Enter to ${b.locked ? 'unpin' : 'pin'}, Delete to remove.`);
+      node.title = (problem ? `${problem}\n\n` : '') + (b.locked ? 'Pinned. Click to unpin.' : 'Drag to move. Click to pin.');
+      node.innerHTML = blockHTML(P, b.s, b.n, sessions[b.id], !!broken) +
         '<button class="b-x" type="button" tabindex="-1" aria-label="Remove">×</button>';
       const i = order.indexOf(b.id);
       if (i >= 0) {
@@ -1340,13 +2155,24 @@
   }
 
   function renderHeads() {
-    const load = DAYS.map(() => 0);
-    state.blocks.forEach(b => { load[b.d] += b.n; });
+    const load = dayLoads(state.blocks);
     dayHeads.forEach((head, d) => {
-      const total = head.querySelector('.dt');
-      total.textContent = load[d] ? hours(load[d]) : '';
-      total.classList.toggle('over', load[d] > DAY_CAP);
-      total.title = load[d] > DAY_CAP ? 'Over 6 h: the optimizer won’t add anything here' : '';
+      const date = dayDate(d);
+      head.querySelector('.dn').textContent = `${DAYS[d]} ${date.getDate()}`;
+      const total = load.work[d] + load.other[d];
+      const over = { work: load.work[d] > state.caps.work, other: load.other[d] > state.caps.other };
+      const dt = head.querySelector('.dt');
+      dt.textContent = total ? hours(total) : '';
+      dt.classList.toggle('over', over.work || over.other);
+      for (const k of ['work', 'other']) {
+        const seg = head.querySelector(`.m-${k}`);
+        seg.style.flexGrow = state.caps[k];
+        seg.firstChild.style.width = `${Math.min(1, load[k][d] / state.caps[k]) * 100}%`;
+        seg.classList.toggle('over', over[k]);
+      }
+      head.title = `${DAYS[d]} ${MONTHS[date.getMonth()]} ${date.getDate()}\n` +
+        `Work: ${hours(load.work[d])} of ${hours(state.caps.work)}\n` +
+        `Everything else: ${hours(load.other[d])} of ${hours(state.caps.other)}`;
     });
   }
 
@@ -1360,8 +2186,12 @@
       ui.target.classList.toggle('off', !cfg.target);
       ui.durDown.disabled = cfg.dur <= DUR_RANGE[0];
       ui.durUp.disabled = cfg.dur >= DUR_RANGE[1];
-      ui.targetDown.disabled = cfg.target <= TARGET_RANGE[0];
-      ui.targetUp.disabled = cfg.target >= TARGET_RANGE[1];
+      const setBySplit = P.id === 'gym' && state.split.length > 0;
+      ui.targetDown.disabled = setBySplit || cfg.target <= TARGET_RANGE[0];
+      ui.targetUp.disabled = setBySplit || cfg.target >= TARGET_RANGE[1];
+      ui.target.parentNode.title = setBySplit
+        ? `Set by your Gym split (${state.split.length} sessions). Change it in Settings.`
+        : `How many ${P.name} pieces you want this week`;
       ui.count.textContent = cfg.target ? `${counts[P.id]}/${cfg.target}` : counts[P.id] ? `${counts[P.id]} placed` : '';
       ui.count.classList.toggle('met', cfg.target > 0 && counts[P.id] >= cfg.target);
       ui.days.forEach((btn, d) => {
@@ -1397,11 +2227,11 @@
       return;
     }
 
-    label.innerHTML = tracked.map(P => {
+    label.innerHTML = '<span class="pg-pre">Planned</span>' + tracked.map(P => {
       const met = counts[P.id] >= state.pieces[P.id].target;
       return `<span class="pg-item${met ? ' met' : ''}" style="--c:${P.color}"><b>${P.name}</b> ${counts[P.id]}/${state.pieces[P.id].target}</span>`;
     }).join('<span class="pg-sep">·</span>');
-    pg.setAttribute('aria-label', tracked.map(P => `${P.name} ${counts[P.id]} of ${state.pieces[P.id].target}`).join(', '));
+    pg.setAttribute('aria-label', 'Planned: ' + tracked.map(P => `${P.name} ${counts[P.id]} of ${state.pieces[P.id].target}`).join(', '));
 
     const key = tracked.map(P => `${P.id}:${state.pieces[P.id].target}`).join('|');
     if (key !== progressKey) {
@@ -1431,14 +2261,28 @@
   }
 
   function renderNow() {
-    const now = new Date();
-    const today = (now.getDay() + 6) % 7; // Monday = 0
-    dayHeads.forEach((head, d) => head.classList.toggle('today', d === today));
-    dayCols.forEach((col, d) => col.classList.toggle('today', d === today));
+    const now = nowOnBoard();
+    dayHeads.forEach((head, d) => head.classList.toggle('today', d === now.day));
+    dayCols.forEach((col, d) => {
+      col.classList.toggle('today', d === now.day);
+      const past = d < now.day ? SLOTS : d === now.day ? Math.max(0, Math.min(SLOTS, now.slot)) : 0;
+      let shade = col.querySelector('.past');
+      if (!shade) {
+        shade = document.createElement('div');
+        shade.className = 'past';
+        col.prepend(shade);
+      }
+      shade.style.setProperty('--past', past);
+      shade.hidden = past <= 0;
+    });
+
+    const over = now.day > 6;
+    $('weekLabel').textContent = over ? `${weekLabel()} · this week is over` : weekLabel();
+    $('weekRow').classList.toggle('over', over);
+    if (isoDate(new Date()) !== counterDay) renderCounters();
 
     let line = grid.querySelector('.now');
-    const minutes = now.getHours() * 60 + now.getMinutes() - START_HOUR * 60;
-    if (minutes < 0 || minutes > (END_HOUR - START_HOUR) * 60) {
+    if (now.day < 0 || now.day > 6 || now.slot < 0 || now.slot > SLOTS) {
       if (line) line.remove();
       return;
     }
@@ -1446,8 +2290,8 @@
       line = document.createElement('div');
       line.className = 'now';
     }
-    line.style.top = `calc(var(--slot-h) * ${minutes / 30})`;
-    if (line.parentNode !== dayCols[today]) dayCols[today].appendChild(line);
+    line.style.top = `calc(var(--slot-h) * ${now.slot})`;
+    if (line.parentNode !== dayCols[now.day]) dayCols[now.day].appendChild(line);
   }
 
   // Size the slots so the whole day fits on screen without scrolling.
@@ -1474,6 +2318,7 @@
   // Drag and drop (pointer events, so mouse, trackpad and touch all work)
   // ---------------------------------------------------------------------------
   let ptr = null;
+  let scrollFrame = 0;
 
   function startPointer(e, node, source) {
     if (e.button !== 0 || ptr) return;
@@ -1491,6 +2336,7 @@
       target: null,
     };
     try { node.setPointerCapture(e.pointerId); } catch { /* not supported: window listeners still work */ }
+    node.addEventListener('lostpointercapture', onLostCapture, { once: true });
     window.addEventListener('pointermove', onPointerMove);
     window.addEventListener('pointerup', onPointerUp);
     window.addEventListener('pointercancel', onPointerCancel);
@@ -1519,6 +2365,7 @@
 
   function onPointerUp(e) {
     if (!ptr || e.pointerId !== ptr.pointerId) return;
+    if (ptr.active) updateDrag(e.clientX, e.clientY); // judge the drop where it was released
     const p = ptr;
     stopListening();
     ptr = null;
@@ -1533,6 +2380,39 @@
   function onPointerCancel(e) {
     if (!ptr || e.pointerId !== ptr.pointerId) return;
     cancelDrag();
+  }
+
+  // Capture is released right after pointerup (by then ptr is cleared); losing
+  // it mid-drag means the browser took the pointer away, so cancel cleanly.
+  function onLostCapture(e) {
+    if (ptr && ptr.active && e.pointerId === ptr.pointerId && e.currentTarget === ptr.node) cancelDrag();
+  }
+
+  // Scrolls the board while a piece is held near its edges.
+  function autoScroll() {
+    scrollFrame = 0;
+    if (!ptr || !ptr.active) return;
+    const r = board.getBoundingClientRect();
+    const top = heads.getBoundingClientRect().bottom;
+    const { x, y } = ptr.last;
+    const EDGE = 48, MAX = 18, REACH = 60;
+    const speed = dist => Math.round(MAX * Math.min(1, Math.max(0, (EDGE - dist) / EDGE)));
+    let dx = 0, dy = 0;
+    if (x >= r.left && x <= r.right + REACH) {
+      if (y < top + EDGE && y > r.top - REACH) dy = -speed(y - top);
+      else if (y > r.bottom - EDGE && y < r.bottom + REACH) dy = speed(r.bottom - y);
+    }
+    if (y >= r.top && y <= r.bottom + REACH) {
+      if (x < r.left + EDGE && x >= r.left) dx = -speed(x - r.left);
+      else if (x > r.right - EDGE && x < r.right + REACH) dx = speed(r.right - x);
+    }
+    if (dx || dy) {
+      const before = board.scrollTop + board.scrollLeft;
+      board.scrollTop += dy;
+      board.scrollLeft += dx;
+      if (board.scrollTop + board.scrollLeft !== before) updateDrag(x, y);
+    }
+    scrollFrame = requestAnimationFrame(autoScroll);
   }
 
   function cancelDrag() {
@@ -1586,10 +2466,13 @@
     preview.style.setProperty('--c', PIECE[ptr.piece].color);
     preview.style.setProperty('--n', ptr.n);
     ptr.preview = preview;
+    ptr.last = { x: ptr.x0, y: ptr.y0 };
     document.body.classList.add('is-dragging');
+    scrollFrame = requestAnimationFrame(autoScroll);
   }
 
   function updateDrag(x, y) {
+    ptr.last = { x, y };
     ptr.ghost.style.translate = `${x - ptr.grabX}px ${y - ptr.grabY}px`;
     const t = dropTarget(x, y);
     ptr.target = t;
@@ -1622,6 +2505,10 @@
       const r = tray.getBoundingClientRect();
       if (x >= r.left && x <= r.right && y >= r.top && y <= r.bottom) return { remove: true };
     }
+    // Only the part of the board you can see counts as a target.
+    const view = board.getBoundingClientRect();
+    const viewTop = heads.getBoundingClientRect().bottom;
+    if (x < view.left || x > view.right || y < viewTop - slotH || y > view.bottom + slotH) return null;
     for (let d = 0; d < 7; d++) {
       const r = dayCols[d].getBoundingClientRect();
       if (x < r.left || x >= r.right) continue;
@@ -1642,6 +2529,8 @@
   }
 
   function finishDrag(p) {
+    cancelAnimationFrame(scrollFrame);
+    scrollFrame = 0;
     const t = p.target;
     p.preview.remove();
     tray.classList.remove('drop-remove', 'hot');
@@ -1694,24 +2583,51 @@
   tray.addEventListener('click', e => {
     const day = e.target.closest('.p-days button');
     if (day) {
+      snapshot();
       const days = state.pieces[day.closest('.piece').dataset.piece].days;
       const d = Number(day.dataset.day);
       days[d] = !days[d];
       save();
-      renderTray();
+      render();
       return;
     }
-    const btn = e.target.closest('.stepper button');
+    const cap = e.target.closest('[data-cap]');
+    if (cap) { setCap(cap.dataset.cap, Number(cap.dataset.step)); return; }
+    const btn = e.target.closest('.piece .stepper button');
     if (btn) setPieceSetting(btn.closest('.piece').dataset.piece, btn.dataset.field, Number(btn.dataset.step));
   });
 
   $('tab-pieces').addEventListener('click', () => showTab('pieces'));
+  $('tab-days').addEventListener('click', () => showTab('days'));
   $('tab-settings').addEventListener('click', () => showTab('settings'));
+  $('counterForm').addEventListener('submit', addCounter);
+  $('counterList').addEventListener('click', onCounterClick);
+  $('counterList').addEventListener('keydown', e => {
+    const article = e.target.closest('.counter');
+    if (!article || !e.target.matches('input')) return;
+    if (e.key === 'Enter') { e.preventDefault(); saveCounter(article); }
+    if (e.key === 'Escape') { e.preventDefault(); editingCounter = null; renderCounters(); }
+  });
+  $('resetPlanner').addEventListener('click', resetPlanner);
+  board.addEventListener('scroll', () => { if (ptr && ptr.active) updateDrag(ptr.last.x, ptr.last.y); });
   $('tfStart').addEventListener('change', e => setTimeFrame(Number(e.target.value), state.frame.end));
   $('splitInput').addEventListener('change', e => setSplit(e.target.value));
   $('tfEnd').addEventListener('change', e => setTimeFrame(state.frame.start, Number(e.target.value)));
 
   $('optBtn').addEventListener('click', runOptimizer);
+  $('newWeekBtn').addEventListener('click', () => ($('weekMenu').hidden ? openWeekMenu() : closeWeekMenu(true)));
+  $('weekMenu').addEventListener('click', e => {
+    const btn = e.target.closest('[data-week]');
+    if (!btn) return;
+    closeWeekMenu(true);
+    if (btn.dataset.week !== 'cancel') startNewWeek(btn.dataset.week);
+  });
+  document.addEventListener('pointerdown', e => {
+    if (!e.target.closest('#weekMenu, #newWeekBtn')) closeWeekMenu(false);
+  });
+  $('toastClose').addEventListener('click', () => $('toast').classList.remove('show'));
+  $('copyWeek').addEventListener('click', copyWeek);
+  $('loadWeek').addEventListener('click', loadPastedWeek);
   $('clearBtn').addEventListener('click', clearUnpinned);
   $('undoBtn').addEventListener('click', undo);
   $('toastUndo').addEventListener('click', () => {
@@ -1722,6 +2638,8 @@
   window.addEventListener('keydown', e => {
     if (e.key === 'Escape' && ptr) {
       cancelDrag();
+    } else if (e.key === 'Escape' && !$('weekMenu').hidden) {
+      closeWeekMenu(true);
     } else if ((e.metaKey || e.ctrlKey) && !e.shiftKey && e.key.toLowerCase() === 'z'
       && !e.target.closest('input, textarea, select')) {
       e.preventDefault();
@@ -1740,8 +2658,15 @@
   if (!storageOk) showStorageWarning();
   fitSlots();
   render();
-  renderNow();
   setInterval(renderNow, 60 * 1000);
+  renderCounters();
+  if (loadNotice) {
+    toast(loadNotice, { ms: 20000 });
+    $('recoveryNote').textContent = loadNotice;
+    $('recoveryNote').hidden = false;
+    $('saveNote').textContent = 'Recovered a damaged save · see Settings → Backup';
+    $('saveNote').classList.add('warn');
+  }
 })();
 </script>
 </body>
